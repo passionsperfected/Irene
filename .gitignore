@@ -1,0 +1,32 @@
+# Xcode
+IRENE/IRENE.xcodeproj/xcuserdata/
+IRENE/IRENE.xcodeproj/project.xcworkspace/xcuserdata/
+IRENE/IRENE.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+*.xcuserstate
+xcuserdata/
+
+# Build
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# SPM
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IDE
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Secrets
+*.env
+.env.*
