@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(sed 's/:.*$//')",
+      "Bash(cd:*)",
+      "Bash(swift --version)",
+      "Bash(brew list:*)",
+      "Bash(brew install:*)",
+      "Bash(ls -la /Users/jdaigle/core/career/passions_perfected/repositories/irene/IRENE/IRENE/Core/Theme/Themes/*.json)",
+      "Bash(xcodegen generate:*)",
+      "Bash(xcodebuild -project IRENE.xcodeproj -scheme IRENE_macOS -destination 'platform=macOS' build)",
+      "Bash(xcodebuild -runFirstLaunch)",
+      "Bash(xcodebuild -project IRENE.xcodeproj -scheme IRENE_macOS -destination 'platform=macOS' build -skipPackagePluginValidation)",
+      "Bash(curl:*)",
+      "Bash(for model:*)",
+      "Bash(do echo:*)",
+      "Bash(done)"
+    ]
+  }
+}

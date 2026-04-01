@@ -1,0 +1,44 @@
+I would like to work on build a rather complex application. I would like it to operate as a mac native note taking tool of sorts. 
+The name of the tool is IRENE, which stands for Intelligent Reasoning Engine and Natural Engagement. The idea is this is a note taking tool that can pass all notes and metadata to an LLM. I would like to use anthropic at the LLM powering the insights. 
+
+I would like this tool to have the follwoing features
+	- DASHBORD: This should show a summary of all data, with a chat feature to where teh user can ask about various summary items
+	- CHAT: This should be a generic llm chat
+	- NOTES: This should be just text input, I would like something that mimics sublime text, free form open text. I would also like a way for it to render MD, not a live render, but something to switch back and fourth between text and rendered text if that makes sense. I would like a way to ask irene, the LLM questions about the notes as well.
+	- STICKIES: I would like a quick way to add a panic note that is displayed as a sticky note. I would like to use control, option, command, 0. This short cut shoudl work system wide as long as the app it running. It shoudl bring up a box to create a new sticky note and save it in the app. Sticky notes should be displayed nicely, and be able to be edited and rearranged.
+	- TO DO: I would like a quick way to add things to a to do list, this short cut should be control, option, command, =. This should also work system wide and create a to do item, the item should go to an inbox of sorts. The to do should have a title and a description. THe quick add should only populate the title.
+	- REMINDER: These should be things that I want to be reminded about, I would like a system wide short cut there too. control, option, command, - should work. 
+	- MAIL: I would like the app to integrate with mac mail app
+	- CALENDAR: I would like the app to integrate with mac calendar app
+	- RECORDING: This should be used for meeting recordings, I would like this app to use mac api to transcript and the llm to summarize. I would like the recording to pull both system and mic audio, so If I am in something like a web ex it will still work.
+
+
+I would like this app to largely be designed for mac, but also run well on ipad and iphone. I would like all files to be stored in a vault of a sort, similar to obsidian. I am thinking we can store pretty much everything as plain text of json. Perhaps a directory structure such as these
+
+
+notes
+	- notes go here
+sticky_notes
+	- sticky notes go here
+to_do
+	- to do actions go here
+reminders
+	- reminder actions go here
+recording
+	audio
+		- audio files go here
+	transcription
+		- transcription files go here
+	summary
+		- ai summary goes here
+settings
+	- settings like system prompts for irene and anthropic keys go here
+	- metadata goes here
+
+I am thinking these files can be sored in icloud such that the mac, Ipad and iphone can all leverage them
+
+
+Lastly in the color_data folder in this project I have some sample color schemes, I would like all of these to be options that a user can selsect. 
+In addition I would like all chats, notes, stickey notes, to do, reminder and recording to have a meta data file, this meta data should have dates around when it was created, last modified, completed, etc. That way we can also the llm questions about it.
+
+I would also love a system prompt that can be edited for irene to give her some personalitly. Perhaps we could have a couple different personality types users could select from?

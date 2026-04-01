@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Irene — Arctic Frost Design System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ── DARKS ── */
+    --void:           #000000;
+    --obsidian:       #000810;
+    --midnight:       #001020;
+    --shadow:         #001830;
+    --slate:          #00203c;
+    --dusk:           #002848;
+    --ash:            #003460;
+
+    /* ── CYAN — Primary Accent ── */
+    --emerald-abyss:  #001828;
+    --emerald-deep:   #002840;
+    --emerald:        #006090;
+    --jade:           #0090c8;
+    --sage:           #20c8f0;
+    --luminous:       #70e8ff;
+    --mint-haze:      #c0f4ff;
+
+    /* ── INDIGO — Secondary Accent ── */
+    --amethyst-abyss: #080020;
+    --amethyst-deep:  #100040;
+    --amethyst:       #280890;
+    --violet:         #4828c0;
+    --lavender:       #7060e8;
+    --mist:           #b0a0f8;
+    --lilac:          #e0d8ff;
+
+    /* ── BLUE-GREY ── */
+    --pewter-deep:    #0a1020;
+    --pewter:         #182038;
+    --steel:          #304060;
+    --silver-cool:    #6080a0;
+    --silver:         #90b0d0;
+    --pearl:          #c0d8f0;
+    --moonstone:      #e0eef8;
+    --shimmer:        #f0f8ff;
+
+    /* ── ICE NEUTRALS ── */
+    --espresso:       #001020;
+    --umber:          #102040;
+    --bronze:         #204880;
+    --tan:            #4070b0;
+    --honey:          #6898d8;
+    --sand:           #a0c4f0;
+    --blush:          #d0e8f8;
+    --warm-white:     #f0f8ff;
+
+    /* ── INTERFACE NEUTRALS ── */
+    --ghost:          #c0d8f0;
+    --ivory:          #eef6ff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--obsidian);
+    color: var(--ivory);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Grain texture overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.028;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Ambient orbs — now 4, with warm tones added ── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(130px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-purple { background: radial-gradient(circle, #0090c845 0%, transparent 70%); top:-200px; left:-200px; animation:drift1 20s ease-in-out infinite alternate; width:700px; height:700px; }
+  .orb-green  { background: radial-gradient(circle, #4828c035 0%, transparent 70%); bottom:-100px; right:-80px; animation:drift2 25s ease-in-out infinite alternate-reverse; width:550px; height:550px; }
+  .orb-warm   { background: radial-gradient(circle, #00609022 0%, transparent 70%); top:40%; left:55%; animation:drift3 30s ease-in-out infinite alternate; width:400px; height:400px; }
+  .orb-silver { background: radial-gradient(circle, #90b0d018 0%, transparent 70%); top:60%; left:10%; animation:drift2 28s ease-in-out infinite alternate; width:350px; height:350px; }
+  @keyframes drift1 { 0%{transform:translate(0,0)} 100%{transform:translate(60px,50px)} }
+  @keyframes drift2 { 0%{transform:translate(0,0)} 100%{transform:translate(-50px,-40px)} }
+  @keyframes drift3 { 0%{transform:translate(0,0)} 100%{transform:translate(40px,-60px)} }
+
+  /* ── Layout ── */
+  .page {
+    position: relative; z-index: 1;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 72px 40px 100px;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(28px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes shimmerMove {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes pulse-glow {
+    0%,100% { box-shadow: 0 0 20px #0090c830; }
+    50%      { box-shadow: 0 0 40px #0090c860; }
+  }
+
+  .section {
+    margin-bottom: 72px;
+    animation: fadeUp 0.85s ease both;
+  }
+  .section:nth-child(2) { animation-delay:.08s }
+  .section:nth-child(3) { animation-delay:.16s }
+  .section:nth-child(4) { animation-delay:.24s }
+  .section:nth-child(5) { animation-delay:.32s }
+  .section:nth-child(6) { animation-delay:.40s }
+  .section:nth-child(7) { animation-delay:.48s }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 88px;
+    animation: fadeUp 0.9s ease both;
+  }
+  .header-eyebrow {
+    font-size: 10px; letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: #0090c8;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(48px, 8vw, 92px);
+    font-weight: 700;
+    background: linear-gradient(135deg,
+      var(--luminous) 0%,
+      var(--jade) 25%,
+      var(--silver) 50%,
+      var(--lavender) 70%,
+      var(--honey) 90%,
+      var(--sand) 100%
+    );
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmerMove 8s linear infinite;
+    line-height: 1.1;
+    letter-spacing: 0.1em;
+    filter: drop-shadow(0 0 50px #15a86840);
+  }
+  .header-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--silver-cool);
+    margin-top: 16px;
+    letter-spacing: 0.06em;
+  }
+  .header-version {
+    display: inline-block;
+    margin-top: 18px;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--tan);
+    border: 1px solid var(--bronze);
+    border-radius: 100px;
+    padding: 4px 16px;
+    background: #8c5a3010;
+  }
+
+  /* ── Section labels ── */
+  .section-label {
+    font-size: 10px; letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .section-label::after {
+    content:''; flex:1; height:1px;
+    background: linear-gradient(to right, var(--amethyst), transparent);
+  }
+
+  /* ── PALETTE ── */
+  .palette-group { margin-bottom: 36px; }
+  .palette-group-label {
+    font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--silver-cool);
+    margin-bottom: 14px;
+  }
+  .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .swatch {
+    width: 88px; border-radius: 8px;
+    overflow: hidden; cursor: default;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+  }
+  .swatch:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 36px #00000090;
+  }
+  .swatch-color { height: 68px; border: 1px solid rgba(255,255,255,0.05); }
+  .swatch-info {
+    background: var(--slate);
+    padding: 8px 9px 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-top: none;
+  }
+  .swatch-name { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ghost); display:block; }
+  .swatch-hex  { font-size: 9px; color: var(--silver-cool); display:block; margin-top:2px; }
+
+  /* ── TONE MAP ── */
+  /* Horizontal gradient bar showing how all palette streams relate */
+  .tone-river {
+    height: 64px;
+    border-radius: 10px;
+    background: linear-gradient(to right,#002840 0%,#006090 8%,#0090c8 15%,#70e8ff 22%,#c0f4ff 27%,#90b0d0 33%,#6080a0 38%,#304060 43%,#c0d8f0 50%,#f0f8ff 55%,#204880 62%,#4070b0 68%,#6898d8 74%,#a0c4f0 80%,#280890 87%,#4828c0 93%,#b0a0f8 100%);
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .tone-river-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--silver-cool);
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .type-sample {
+    padding: 28px 32px;
+    background: var(--slate);
+    border: 1px solid var(--ash);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  .type-sample:hover { border-color: var(--amethyst); }
+  .type-meta { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--silver-cool); margin-bottom: 12px; }
+
+  .t-display {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 38px; font-weight: 700;
+    background: linear-gradient(120deg, var(--luminous), var(--jade) 40%, var(--silver) 70%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    line-height: 1.2; letter-spacing: 0.06em;
+  }
+  .t-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 300; font-style: italic;
+    background: linear-gradient(120deg, var(--honey), var(--sand));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    line-height: 1.4;
+  }
+  .t-body {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px; font-weight: 400; line-height: 1.75;
+    color: var(--ghost); letter-spacing: 0.025em;
+  }
+  .t-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--jade);
+  }
+  .t-silver {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 600; font-style: italic;
+    color: var(--pearl);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── COMPONENTS GRID ── */
+  .comp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .comp-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+  }
+  @media(max-width:700px) { .comp-grid, .comp-grid-3 { grid-template-columns:1fr; } }
+
+  .comp-card {
+    background: var(--slate);
+    border: 1px solid var(--ash);
+    border-radius: 12px; padding: 28px;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+  .comp-card:hover { border-color: var(--violet); box-shadow: 0 0 28px #6b3fa018; }
+  .comp-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--silver-cool); margin-bottom: 20px; }
+
+  /* Buttons */
+  .btn-row { display:flex; flex-wrap:wrap; gap:10px; }
+  .btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 11px 22px; border-radius: 5px; border: none;
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .btn-emerald {
+    background: linear-gradient(135deg, var(--emerald), var(--jade));
+    color: var(--obsidian);
+    box-shadow: 0 4px 20px #0090c840;
+  }
+  .btn-emerald:hover { box-shadow: 0 6px 32px #0090c870; transform:translateY(-2px); }
+
+  .btn-silver {
+    background: linear-gradient(135deg, var(--pewter), var(--steel));
+    color: var(--shimmer);
+    border: 1px solid var(--silver-cool);
+  }
+  .btn-silver:hover { background: linear-gradient(135deg, var(--steel), var(--silver-cool)); box-shadow: 0 4px 20px #b4b4cc30; }
+
+  .btn-warm {
+    background: linear-gradient(135deg, var(--umber), var(--bronze));
+    color: var(--sand);
+    border: 1px solid var(--tan);
+  }
+  .btn-warm:hover { box-shadow: 0 4px 24px #b8865a40; transform:translateY(-2px); }
+
+  .btn-violet {
+    background: transparent;
+    color: var(--lavender);
+    border: 1px solid var(--violet);
+  }
+  .btn-violet:hover { box-shadow: 0 0 18px #6b3fa040; border-color: var(--lavender); color: var(--mist); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--silver-cool);
+    border: 1px solid var(--ash);
+  }
+  .btn-ghost:hover { border-color: var(--steel); color: var(--pearl); }
+
+  /* Input */
+  .input-wrap { position: relative; }
+  .input-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--jade); font-size:15px; pointer-events:none; }
+  .irene-input {
+    width: 100%;
+    background: var(--shadow); border: 1px solid var(--ash);
+    border-radius: 6px; padding: 13px 14px 13px 42px;
+    color: var(--ivory);
+    font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight:400; letter-spacing:0.04em;
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .irene-input::placeholder { color: var(--ash); }
+  .irene-input:focus { border-color: var(--jade); box-shadow: 0 0 0 3px #15a86815, 0 0 20px #15a86820; }
+
+  /* Chat */
+  .chat-demo { display:flex; flex-direction:column; gap:12px; }
+  .chat-msg {
+    max-width: 88%; padding: 12px 16px; font-size: 14px; line-height: 1.55; letter-spacing: 0.02em;
+  }
+  .chat-user {
+    align-self: flex-end;
+    background: var(--amethyst-deep); border: 1px solid var(--amethyst);
+    color: var(--mist); border-radius: 10px 10px 2px 10px;
+  }
+  .chat-irene {
+    align-self: flex-start;
+    background: var(--emerald-abyss); border: 1px solid var(--emerald);
+    color: var(--sage); border-radius: 10px 10px 10px 2px;
+  }
+  .chat-irene .irene-tag {
+    font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--jade); display:block; margin-bottom:6px;
+  }
+
+  /* Badges */
+  .badge-row { display:flex; flex-wrap:wrap; gap:8px; }
+  .badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 5px 13px; border-radius: 100px;
+  }
+  .bdg-green  { background:#0d7a4a1a; border:1px solid var(--emerald); color:var(--sage); }
+  .bdg-glow   { background:#15a86815; border:1px solid var(--jade); color:var(--luminous); animation: pulse-glow 3s ease-in-out infinite; }
+  .bdg-purple { background:#3d1f6e1a; border:1px solid var(--violet); color:var(--lavender); }
+  .bdg-silver { background:#5e5e7220; border:1px solid var(--silver-cool); color:var(--pearl); }
+  .bdg-warm   { background:#8c5a3020; border:1px solid var(--bronze); color:var(--honey); }
+  .bdg-muted  { background:#3a385220; border:1px solid var(--ash); color:var(--silver-cool); }
+
+  /* Slider */
+  .slider-track {
+    width: 100%; height: 4px;
+    background: linear-gradient(to right, var(--jade) 65%, var(--ash) 65%);
+    border-radius: 4px; position:relative; margin: 12px 0;
+  }
+  .slider-thumb {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--jade); border: 2px solid var(--luminous);
+    position:absolute; top:-6px; left:63%;
+    box-shadow: 0 0 14px #0090c860;
+  }
+  .slider-labels { display:flex; justify-content:space-between; font-size:10px; letter-spacing:0.1em; color:var(--silver-cool); }
+
+  /* Toggle */
+  .toggle-row { display:flex; flex-direction:column; gap:10px; }
+  .toggle-item { display:flex; align-items:center; justify-content:space-between; }
+  .toggle-label { font-size:14px; font-weight:500; letter-spacing:0.05em; color:var(--ghost); }
+  .toggle {
+    width: 42px; height: 22px; border-radius: 100px;
+    position: relative; cursor:pointer;
+  }
+  .toggle.on { background: linear-gradient(to right, var(--emerald), var(--jade)); box-shadow: 0 0 10px #0090c840; }
+  .toggle.off { background: var(--ash); }
+  .toggle::after {
+    content:''; position:absolute; top:3px; width:16px; height:16px;
+    background: var(--shimmer); border-radius:50%; transition:left 0.2s;
+  }
+  .toggle.on::after  { left: 23px; }
+  .toggle.off::after { left: 3px; }
+
+  /* Progress bars */
+  .progress-stack { display:flex; flex-direction:column; gap:14px; }
+  .progress-item { }
+  .progress-head { display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px; letter-spacing:0.08em; }
+  .progress-label { color:var(--ghost); font-weight:500; }
+  .progress-val { color:var(--silver-cool); }
+  .progress-bg { height:5px; background:var(--ash); border-radius:4px; overflow:hidden; }
+  .progress-fill { height:100%; border-radius:4px; }
+  .pf-green  { background: linear-gradient(to right, var(--emerald), var(--sage)); width:82%; }
+  .pf-purple { background: linear-gradient(to right, var(--amethyst), var(--lavender)); width:65%; }
+  .pf-silver { background: linear-gradient(to right, var(--steel), var(--pearl)); width:90%; }
+  .pf-warm   { background: linear-gradient(to right, var(--umber), var(--honey)); width:47%; }
+
+  /* ── BRAND SECTION ── */
+  .brand-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media(max-width:700px) { .brand-grid { grid-template-columns:1fr; } }
+
+  .brand-card {
+    border-radius: 14px; padding: 36px 24px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap: 10px; border: 1px solid; min-height: 180px;
+    transition: transform 0.2s;
+  }
+  .brand-card:hover { transform: translateY(-4px); }
+
+  .bc-void    { background: var(--void);         border-color: var(--ash); }
+  .bc-slate   { background: var(--slate);        border-color: var(--ash); }
+  .bc-purple  { background: var(--amethyst-deep); border-color: var(--amethyst); }
+  .bc-warm    { background: #180f08;             border-color: var(--bronze); }
+  .bc-silver  { background: var(--pewter-deep);  border-color: var(--steel); }
+  .bc-light   { background: var(--warm-white);   border-color: var(--sand); }
+
+  .brand-mark {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 28px; font-weight:700; letter-spacing: 0.12em;
+  }
+  .bm-default {
+    background: linear-gradient(135deg, var(--luminous), var(--jade) 35%, var(--silver) 65%, var(--lavender));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    filter: drop-shadow(0 0 18px #15a86840);
+  }
+  .bm-warm {
+    background: linear-gradient(135deg, var(--honey), var(--sand) 50%, var(--blush));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    filter: drop-shadow(0 0 16px #d4a57440);
+  }
+  .bm-silver {
+    background: linear-gradient(135deg, var(--steel), var(--pearl) 50%, var(--shimmer));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    filter: drop-shadow(0 0 14px #b4b4cc30);
+  }
+  .bm-light {
+    background: linear-gradient(135deg, #0d7a4a, #3d1f6e 60%, #8c5a30);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .brand-sub {
+    font-family: 'Cormorant Garamond', serif; font-style:italic;
+    font-size: 13px; letter-spacing:0.08em;
+  }
+  .bc-void .brand-sub, .bc-slate .brand-sub, .bc-purple .brand-sub { color: var(--silver-cool); }
+  .bc-warm .brand-sub   { color: var(--tan); }
+  .bc-silver .brand-sub { color: var(--steel); }
+  .bc-light .brand-sub  { color: var(--bronze); }
+
+  /* ── COLOR STORY / CONCEPT CARD ── */
+  .concept-card {
+    background: var(--slate);
+    border: 1px solid var(--ash);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .concept-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    height: 80px;
+  }
+  .concept-stripe { flex:1; }
+  .cs-green  { background: linear-gradient(180deg, var(--emerald-abyss), var(--jade)); }
+  .cs-silver { background: linear-gradient(180deg, var(--pewter-deep), var(--pearl)); }
+  .cs-warm   { background: linear-gradient(180deg, var(--espresso), var(--honey)); }
+  .cs-purple { background: linear-gradient(180deg, var(--amethyst-abyss), var(--lavender)); }
+  .cs-blend  { background: linear-gradient(180deg, var(--midnight), var(--sage)); }
+
+  .concept-body { padding: 32px; }
+  .concept-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 20px;
+    background: linear-gradient(120deg, var(--luminous), var(--honey), var(--mist));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    margin-bottom: 12px;
+  }
+  .concept-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px; font-weight:300; font-style:italic;
+    color: var(--ghost); line-height: 1.7;
+  }
+  .concept-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+  .concept-tag {
+    font-size: 9px; letter-spacing:0.25em; text-transform:uppercase;
+    padding: 4px 12px; border-radius:100px;
+  }
+  .ct-g { background:#0d7a4a15; border:1px solid var(--emerald); color:var(--sage); }
+  .ct-s { background:#5e5e7215; border:1px solid var(--steel); color:var(--pearl); }
+  .ct-w { background:#8c5a3015; border:1px solid var(--bronze); color:var(--honey); }
+  .ct-p { background:#6b3fa015; border:1px solid var(--violet); color:var(--lavender); }
+
+  /* ── COMBINED GRADIENT SHOWCASE ── */
+  .gradient-strip {
+    height: 90px; border-radius: 10px;
+    background: linear-gradient(135deg,#000000 0%,#100040 12%,#001828 25%,#00203c 38%,#304060 48%,#102040 58%,#204880 68%,#4828c0 78%,#0090c8 88%,#b0a0f8 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .gradient-strip::after {
+    content: '';
+    position:absolute; inset:0;
+    background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+    animation: shimmerMove 4s linear infinite;
+  }
+  .gradient-label {
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--silver-cool);
+    display:flex; justify-content:space-between;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align:center; padding-top:48px;
+    border-top:1px solid var(--dusk);
+    font-size:10px; letter-spacing:0.3em; text-transform:uppercase; color:var(--ash);
+    margin-top: 20px;
+  }
+  .footer .accent-g { color:var(--jade); }
+  .footer .accent-s { color:var(--silver-cool); }
+  .footer .accent-w { color:var(--tan); }
+</style>
+</head>
+<body>
+
+<div class="orb orb-purple"></div>
+<div class="orb orb-green"></div>
+<div class="orb orb-warm"></div>
+<div class="orb orb-silver"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="header">
+    <p class="header-eyebrow">Design System · Arctic Frost</p>
+    <h1>Irene</h1>
+    <p class="header-sub">Arcane Intelligence · Unified Color Foundation</p>
+    <span class="header-version">Cyan · Indigo · Ice · Void</span>
+  </header>
+
+  <!-- COLOR STORY -->
+  <section class="section">
+    <div class="section-label">Color Story</div>
+    <div class="concept-card">
+      <div class="concept-header">
+        <div class="concept-stripe cs-green" style="background:linear-gradient(180deg,#001828,#0090c8)"></div>
+        <div class="concept-stripe cs-silver" style="background:linear-gradient(180deg,#0a1020,#c0d8f0)"></div>
+        <div class="concept-stripe cs-warm" style="background:linear-gradient(180deg,#001020,#6898d8)"></div>
+        <div class="concept-stripe cs-purple" style="background:linear-gradient(180deg,#080020,#7060e8)"></div>
+        <div class="concept-stripe cs-blend" style="background:linear-gradient(180deg,#001020,#20c8f0)"></div>
+      </div>
+      <div class="concept-body">
+        <div class="concept-title">The Frozen Deep</div>
+        <div class="concept-desc">
+          Irene&apos;s arctic palette pulses with the clarity of glacial light — electric cyan cutting through navy voids, indigo depth giving way to ice-blue luminance. Cold, precise, and beautifully infinite. Built for those who see through complexity.
+        </div>
+        <div class="concept-tags">
+          <span class="concept-tag ct-g" style="color:#20c8f0;background:#00609015;border-color:#006090">Cyan · Clarity · Action</span>
+          <span class="concept-tag ct-s" style="color:#90b0d0;background:#30406015;border-color:#304060">Ice · Precision · Depth</span>
+          <span class="concept-tag ct-w" style="color:#6898d8;background:#20488015;border-color:#204880">Indigo · Mystery · Focus</span>
+          <span class="concept-tag ct-p" style="color:#7060e8;background:#28009015;border-color:#280890">Void · Space · Foundation</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PALETTE -->
+  <section class="section">
+    <div class="section-label">Full Color Palette</div>
+
+    <div class="palette-group">
+      <div class="palette-group-label">Void &amp; Darks — Backgrounds</div>
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-color" style="background:#000000;"></div><div class="swatch-info"><span class="swatch-name">Void</span><span class="swatch-hex">#000000</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#000810;"></div><div class="swatch-info"><span class="swatch-name">Obsidian</span><span class="swatch-hex">#000810</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#001020;"></div><div class="swatch-info"><span class="swatch-name">Midnight</span><span class="swatch-hex">#001020</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#00203c;"></div><div class="swatch-info"><span class="swatch-name">Slate</span><span class="swatch-hex">#00203c</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#002848;"></div><div class="swatch-info"><span class="swatch-name">Dusk</span><span class="swatch-hex">#002848</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#003460;"></div><div class="swatch-info"><span class="swatch-name">Ash</span><span class="swatch-hex">#003460</span></div></div>
+      </div>
+    </div>
+    <div class="palette-group">
+      <div class="palette-group-label">Cyan — Primary Accent (the signal)</div>
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-color" style="background:#001828;"></div><div class="swatch-info"><span class="swatch-name">Abyss</span><span class="swatch-hex">#001828</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#002840;"></div><div class="swatch-info"><span class="swatch-name">Deep</span><span class="swatch-hex">#002840</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#006090;"></div><div class="swatch-info"><span class="swatch-name">Ocean</span><span class="swatch-hex">#006090</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#0090c8;"></div><div class="swatch-info"><span class="swatch-name">Cyan</span><span class="swatch-hex">#0090c8</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#20c8f0;"></div><div class="swatch-info"><span class="swatch-name">Ice</span><span class="swatch-hex">#20c8f0</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#70e8ff;"></div><div class="swatch-info"><span class="swatch-name">Arc</span><span class="swatch-hex">#70e8ff</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#c0f4ff; border:1px solid rgba(0,0,0,0.08);"></div><div class="swatch-info"><span class="swatch-name">Mist</span><span class="swatch-hex">#c0f4ff</span></div></div>
+      </div>
+    </div>
+    <div class="palette-group">
+      <div class="palette-group-label">Indigo — Secondary Accent (the depth)</div>
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-color" style="background:#080020;"></div><div class="swatch-info"><span class="swatch-name">Abyss</span><span class="swatch-hex">#080020</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#100040;"></div><div class="swatch-info"><span class="swatch-name">Deep</span><span class="swatch-hex">#100040</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#280890;"></div><div class="swatch-info"><span class="swatch-name">Indigo</span><span class="swatch-hex">#280890</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#4828c0;"></div><div class="swatch-info"><span class="swatch-name">Violet</span><span class="swatch-hex">#4828c0</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#7060e8;"></div><div class="swatch-info"><span class="swatch-name">Lavender</span><span class="swatch-hex">#7060e8</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#b0a0f8; border:1px solid rgba(0,0,0,0.08);"></div><div class="swatch-info"><span class="swatch-name">Mist</span><span class="swatch-hex">#b0a0f8</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#e0d8ff; border:1px solid rgba(0,0,0,0.08);"></div><div class="swatch-info"><span class="swatch-name">Lilac</span><span class="swatch-hex">#e0d8ff</span></div></div>
+      </div>
+    </div>
+    <div class="palette-group">
+      <div class="palette-group-label">Blue-Grey — Neutral Support</div>
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-color" style="background:#0a1020;"></div><div class="swatch-info"><span class="swatch-name">Pewter Deep</span><span class="swatch-hex">#0a1020</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#182038;"></div><div class="swatch-info"><span class="swatch-name">Pewter</span><span class="swatch-hex">#182038</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#304060;"></div><div class="swatch-info"><span class="swatch-name">Steel</span><span class="swatch-hex">#304060</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#6080a0;"></div><div class="swatch-info"><span class="swatch-name">Blue Cool</span><span class="swatch-hex">#6080a0</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#90b0d0;"></div><div class="swatch-info"><span class="swatch-name">Silver</span><span class="swatch-hex">#90b0d0</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#c0d8f0; border:1px solid rgba(0,0,0,0.08);"></div><div class="swatch-info"><span class="swatch-name">Pearl</span><span class="swatch-hex">#c0d8f0</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#f0f8ff; border:1px solid rgba(0,0,0,0.08);"></div><div class="swatch-info"><span class="swatch-name">Shimmer</span><span class="swatch-hex">#f0f8ff</span></div></div>
+      </div>
+    </div>
+    <div class="palette-group">
+      <div class="palette-group-label">Ice Neutrals — Cool Warmth</div>
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-color" style="background:#001020;"></div><div class="swatch-info"><span class="swatch-name">Abyss</span><span class="swatch-hex">#001020</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#102040;"></div><div class="swatch-info"><span class="swatch-name">Deep</span><span class="swatch-hex">#102040</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#204880;"></div><div class="swatch-info"><span class="swatch-name">Navy</span><span class="swatch-hex">#204880</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#4070b0;"></div><div class="swatch-info"><span class="swatch-name">Slate</span><span class="swatch-hex">#4070b0</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#6898d8;"></div><div class="swatch-info"><span class="swatch-name">Horizon</span><span class="swatch-hex">#6898d8</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#a0c4f0;"></div><div class="swatch-info"><span class="swatch-name">Sky</span><span class="swatch-hex">#a0c4f0</span></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#f0f8ff; border:1px solid rgba(0,0,0,0.08);"></div><div class="swatch-info"><span class="swatch-name">White</span><span class="swatch-hex">#f0f8ff</span></div></div>
+      </div>
+    </div>
+</section>
+
+  <!-- HARMONY / GRADIENT STORY -->
+  <section class="section">
+    <div class="section-label">Gradient Harmony — All Streams Together</div>
+    <div class="gradient-strip"></div>
+    <div class="gradient-label">
+      <span>Void</span>
+      <span>Indigo</span>
+      <span>Ocean</span>
+      <span>Steel</span>
+      <span>Ice</span>
+      <span>Navy</span>
+      <span>Violet</span>
+      <span>Frost</span>
+    </div>
+  </section>
+
+  <!-- TONE RIVER -->
+  <section class="section">
+    <div class="section-label">Luminosity Ramp — Darks to Lights</div>
+    <div class="tone-river"></div>
+    <div class="tone-river-labels">
+      <span>Cyan Scale</span>
+      <span>Silver Scale</span>
+      <span>Ice Scale</span>
+      <span>Indigo Scale</span>
+    </div>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section class="section">
+    <div class="section-label">Typography</div>
+    <div class="type-sample">
+      <div class="type-meta">Display · Cinzel Decorative Bold — Wordmark, Hero Titles</div>
+      <div class="t-display">Irene — The Arcane Intelligence</div>
+    </div>
+    <div class="type-sample">
+      <div class="type-meta">Cormorant Garamond Light Italic — Warmth Tones — Taglines &amp; Narrative</div>
+      <div class="t-subtitle">"Knowledge is not power — knowing what matters is."</div>
+    </div>
+    <div class="type-sample">
+      <div class="type-meta">Cormorant Garamond SemiBold — Silver Tones — Pull Quotes</div>
+      <div class="t-silver">She remembers. She anticipates. She understands.</div>
+    </div>
+    <div class="type-sample">
+      <div class="type-meta">Rajdhani Regular — Body, Descriptions, Interface Copy</div>
+      <div class="t-body">Irene processes your world with fluid intelligence — reading context, recalling history, and surfacing what others overlook. Built for those who demand precision wrapped in elegance.</div>
+    </div>
+    <div class="type-sample">
+      <div class="type-meta">Rajdhani SemiBold — Labels, Status, Metadata</div>
+      <div class="t-label">Status · Active &nbsp;|&nbsp; Session 00:42:17 &nbsp;|&nbsp; Memory: 2.4k tokens</div>
+    </div>
+  </section>
+
+  <!-- COMPONENTS -->
+  <section class="section">
+    <div class="section-label">UI Components</div>
+    <div class="comp-grid" style="margin-bottom:18px;">
+
+      <div class="comp-card">
+        <div class="comp-title">Button Family — All Four Streams</div>
+        <div class="btn-row">
+          <button class="btn btn-emerald">Ask Irene</button>
+          <button class="btn btn-silver">Settings</button>
+          <button class="btn btn-warm">Archive</button>
+          <button class="btn btn-violet">Explore</button>
+          <button class="btn btn-ghost">Cancel</button>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-title">Chat Interface</div>
+        <div class="chat-demo">
+          <div class="chat-msg chat-user">Summarize my week for me.</div>
+          <div class="chat-msg chat-irene">
+            <span class="irene-tag">Irene</span>
+            You had 14 meetings, closed 3 action items, and have 2 pending decisions waiting. I've drafted a summary for your review.
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="comp-grid" style="margin-bottom:18px;">
+
+      <div class="comp-card">
+        <div class="comp-title">Text Input</div>
+        <div class="input-wrap">
+          <span class="input-icon">✦</span>
+          <input class="irene-input" type="text" placeholder="Ask me anything…">
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-title">Badges — Cross-Palette</div>
+        <div class="badge-row">
+          <span class="badge bdg-glow">● Online</span>
+          <span class="badge bdg-green">Done</span>
+          <span class="badge bdg-purple">Thinking</span>
+          <span class="badge bdg-silver">Archived</span>
+          <span class="badge bdg-warm">Flagged</span>
+          <span class="badge bdg-muted">Idle</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="comp-grid-3">
+
+      <div class="comp-card">
+        <div class="comp-title">Insight Depth — Slider</div>
+        <div class="slider-track"><div class="slider-thumb"></div></div>
+        <div class="slider-labels"><span>Surface</span><span>Deep</span></div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-title">Settings — Toggles</div>
+        <div class="toggle-row">
+          <div class="toggle-item"><span class="toggle-label">Memory</span><div class="toggle on"></div></div>
+          <div class="toggle-item"><span class="toggle-label">Voice</span><div class="toggle off"></div></div>
+          <div class="toggle-item"><span class="toggle-label">Proactive</span><div class="toggle on"></div></div>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-title">Capability — Progress</div>
+        <div class="progress-stack">
+          <div class="progress-item">
+            <div class="progress-head"><span class="progress-label">Reasoning</span><span class="progress-val">82%</span></div>
+            <div class="progress-bg"><div class="progress-fill pf-green"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-head"><span class="progress-label">Creativity</span><span class="progress-val">65%</span></div>
+            <div class="progress-bg"><div class="progress-fill pf-purple"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-head"><span class="progress-label">Precision</span><span class="progress-val">90%</span></div>
+            <div class="progress-bg"><div class="progress-fill pf-silver"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-head"><span class="progress-label">Empathy</span><span class="progress-val">47%</span></div>
+            <div class="progress-bg"><div class="progress-fill pf-warm"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BRAND MARKS -->
+  <section class="section">
+    <div class="section-label">Brand Mark — Context Variations</div>
+    <div class="brand-grid">
+      <div class="brand-card bc-void">
+        <div class="brand-mark bm-default">IRENE</div>
+        <div class="brand-sub">Primary on Void</div>
+      </div>
+      <div class="brand-card bc-purple">
+        <div class="brand-mark bm-default">IRENE</div>
+        <div class="brand-sub">on Amethyst Deep</div>
+      </div>
+      <div class="brand-card bc-slate">
+        <div class="brand-mark bm-silver">IRENE</div>
+        <div class="brand-sub">Silver on Slate</div>
+      </div>
+      <div class="brand-card bc-warm">
+        <div class="brand-mark bm-warm">IRENE</div>
+        <div class="brand-sub">Warmth on Espresso</div>
+      </div>
+      <div class="brand-card bc-silver">
+        <div class="brand-mark bm-silver">IRENE</div>
+        <div class="brand-sub">Silver on Pewter</div>
+      </div>
+      <div class="brand-card bc-light">
+        <div class="brand-mark bm-light">IRENE</div>
+        <div class="brand-sub">Reversed on Warm White</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="accent-g">Cyan</span> · <span class="accent-s">Indigo</span> · <span class="accent-w">Ice</span> · Void &nbsp;—&nbsp; Irene Design System · Arctic Frost · 2025
+  </footer>
+
+</div>
+</body>
+</html>
