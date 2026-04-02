@@ -8,6 +8,7 @@ struct FileEditorView: View {
     @Environment(\.ireneTheme) private var theme
     @FocusState private var focusedField: FocusField?
     @State private var showAIAssistant = false
+    @State private var showFindReplace = false
     @State private var isEditingName = false
     @State private var editingName = ""
 
@@ -21,6 +22,17 @@ struct FileEditorView: View {
             VStack(spacing: 0) {
                 toolbar
                 Divider().overlay(theme.border.opacity(0.3))
+
+                // Find/Replace bar
+                if showFindReplace {
+                    FindReplaceBar(
+                        isVisible: $showFindReplace,
+                        content: viewModel.contentBinding,
+                        onHighlightMatches: { matches, currentIndex in
+                            highlightMatches(matches, currentIndex: currentIndex)
+                        }
+                    )
+                }
 
                 // Editor / Preview content
                 if viewModel.isRendering && viewModel.isMarkdown {
@@ -65,6 +77,31 @@ struct FileEditorView: View {
         .onDisappear {
             Task {
                 await viewModel.saveImmediately()
+            }
+        }
+        .toolbar {
+            // Hidden buttons just for keyboard shortcuts
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        showFindReplace = true
+                    }
+                } label: {
+                    EmptyView()
+                }
+                .keyboardShortcut("f", modifiers: .command)
+                .hidden()
+            }
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        showFindReplace = true
+                    }
+                } label: {
+                    EmptyView()
+                }
+                .keyboardShortcut("h", modifiers: [.command, .option])
+                .hidden()
             }
         }
     }
@@ -283,25 +320,89 @@ struct FileEditorView: View {
 
     // MARK: - Disable macOS Smart Editing
 
+    // MARK: - macOS NSTextView helpers
+
     #if os(macOS)
     private func disableSmartEditing() {
-        guard let window = NSApplication.shared.keyWindow else { return }
-        disableSmartEditingInView(window.contentView)
+        guard let textView = findNSTextView() else { return }
+        textView.isAutomaticQuoteSubstitutionEnabled = false
+        textView.isAutomaticDashSubstitutionEnabled = false
+        textView.isAutomaticTextReplacementEnabled = false
+        textView.isAutomaticSpellingCorrectionEnabled = false
+        textView.isAutomaticLinkDetectionEnabled = false
+        textView.smartInsertDeleteEnabled = false
     }
 
-    private func disableSmartEditingInView(_ view: NSView?) {
-        guard let view else { return }
-        if let textView = view as? NSTextView {
-            textView.isAutomaticQuoteSubstitutionEnabled = false
-            textView.isAutomaticDashSubstitutionEnabled = false
-            textView.isAutomaticTextReplacementEnabled = false
-            textView.isAutomaticSpellingCorrectionEnabled = false
-            textView.isAutomaticLinkDetectionEnabled = false
-            textView.smartInsertDeleteEnabled = false
+    private func highlightMatches(_ matches: [Range<String.Index>], currentIndex: Int) {
+        guard let textView = findNSTextView(),
+              let layoutManager = textView.layoutManager,
+              let textStorage = textView.textStorage else { return }
+
+        let content = textView.string
+
+        // Clear old highlights
+        let fullRange = NSRange(location: 0, length: textStorage.length)
+        textStorage.removeAttribute(.backgroundColor, range: fullRange)
+
+        guard !matches.isEmpty else { return }
+
+        // Highlight all matches with a dim color
+        let highlightColor = NSColor(theme.accent.opacity(0.2))
+        let currentColor = NSColor(theme.accent.opacity(0.5))
+
+        for (index, range) in matches.enumerated() {
+            guard let nsRange = Range(uncheckedBounds: (range.lowerBound, range.upperBound))
+                    .relative(to: content)
+                    .toNSRange(in: content) else { continue }
+
+            if currentIndex == -1 {
+                // "Find All" — highlight all with strong color
+                textStorage.addAttribute(.backgroundColor, value: currentColor, range: nsRange)
+            } else if index == currentIndex {
+                // Current match — strong highlight
+                textStorage.addAttribute(.backgroundColor, value: currentColor, range: nsRange)
+                // Scroll to current match
+                textView.scrollRangeToVisible(nsRange)
+            } else {
+                // Other matches — dim highlight
+                textStorage.addAttribute(.backgroundColor, value: highlightColor, range: nsRange)
+            }
+        }
+    }
+
+    private func findNSTextView() -> NSTextView? {
+        guard let window = NSApplication.shared.keyWindow else { return nil }
+        return findTextViewIn(window.contentView)
+    }
+
+    private func findTextViewIn(_ view: NSView?) -> NSTextView? {
+        guard let view else { return nil }
+        if let textView = view as? NSTextView, textView.isEditable {
+            return textView
         }
         for subview in view.subviews {
-            disableSmartEditingInView(subview)
+            if let found = findTextViewIn(subview) {
+                return found
+            }
         }
+        return nil
+    }
+    #else
+    private func highlightMatches(_ matches: [Range<String.Index>], currentIndex: Int) {
+        // iOS: no NSTextView, highlighting not supported in SwiftUI TextEditor
     }
     #endif
 }
+
+// MARK: - Range helper
+
+private extension Range where Bound == String.Index {
+    func toNSRange(in string: String) -> NSRange? {
+        guard let lower = lowerBound.samePosition(in: string.utf16),
+              let upper = upperBound.samePosition(in: string.utf16) else { return nil }
+        let location = string.utf16.distance(from: string.utf16.startIndex, to: lower)
+        let length = string.utf16.distance(from: lower, to: upper)
+        return NSRange(location: location, length: length)
+    }
+}
+

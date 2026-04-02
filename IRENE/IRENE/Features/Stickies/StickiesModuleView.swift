@@ -6,6 +6,9 @@ struct StickiesModuleView: View {
     @State private var viewModel: StickiesViewModel
     @State private var editingSticky: StickyNote?
     @State private var showQuickCapture = false
+    @State private var isJiggleMode = false
+    @State private var draggingSticky: StickyNote?
+    @State private var longPressingSticky: UUID?
 
     @Environment(\.ireneTheme) private var theme
 
@@ -15,7 +18,7 @@ struct StickiesModuleView: View {
     }
 
     private let columns = [
-        GridItem(.adaptive(minimum: 180, maximum: 280), spacing: 12)
+        GridItem(.adaptive(minimum: 270, maximum: 420), spacing: 16)
     ]
 
     var body: some View {
@@ -51,6 +54,24 @@ struct StickiesModuleView: View {
                 }
             }
         }
+        // Tap background to exit jiggle mode
+        .onTapGesture {
+            if isJiggleMode {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    isJiggleMode = false
+                }
+            }
+        }
+        // Escape to exit jiggle mode
+        #if os(macOS)
+        .onExitCommand {
+            if isJiggleMode {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    isJiggleMode = false
+                }
+            }
+        }
+        #endif
     }
 
     // MARK: - Toolbar
@@ -61,16 +82,31 @@ struct StickiesModuleView: View {
                 .font(Typography.bodySemiBold(size: 14))
                 .foregroundStyle(theme.primaryText)
 
+            if isJiggleMode {
+                Button {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        isJiggleMode = false
+                    }
+                } label: {
+                    Text("Done")
+                        .font(Typography.bodySemiBold(size: 12))
+                        .foregroundStyle(theme.accent)
+                }
+                .buttonStyle(.plain)
+            }
+
             Spacer()
 
-            SearchBar(
-                text: Binding(
-                    get: { viewModel.searchText },
-                    set: { viewModel.searchText = $0 }
-                ),
-                placeholder: "Search stickies..."
-            )
-            .frame(maxWidth: 220)
+            if !isJiggleMode {
+                SearchBar(
+                    text: Binding(
+                        get: { viewModel.searchText },
+                        set: { viewModel.searchText = $0 }
+                    ),
+                    placeholder: "Search stickies..."
+                )
+                .frame(maxWidth: 220)
+            }
 
             Button {
                 showQuickCapture = true
@@ -89,20 +125,48 @@ struct StickiesModuleView: View {
 
     private var gridContent: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 12) {
+            LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(viewModel.filteredStickies) { sticky in
                     StickyNoteCard(
                         sticky: sticky,
+                        isJiggling: isJiggleMode,
                         onTap: {
-                            editingSticky = sticky
+                            if isJiggleMode {
+                                // In jiggle mode, tap does nothing (drag to reorder)
+                            } else {
+                                editingSticky = sticky
+                            }
                         },
                         onDelete: {
                             Task { await viewModel.deleteSticky(sticky) }
                         }
                     )
+                    .onLongPressGesture(minimumDuration: 0.4, pressing: { pressing in
+                        // Immediate scale feedback while pressing
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            longPressingSticky = pressing ? sticky.id : nil
+                        }
+                    }, perform: {
+                        longPressingSticky = nil
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isJiggleMode = true
+                        }
+                    })
+                    .scaleEffect(longPressingSticky == sticky.id ? 0.93 : 1.0)
+                    .opacity(draggingSticky?.id == sticky.id ? 0.4 : 1.0)
+                    .onDrag {
+                        draggingSticky = sticky
+                        return NSItemProvider(object: sticky.id.uuidString as NSString)
+                    }
+                    .onDrop(of: [.text], delegate: StickyDropDelegate(
+                        targetSticky: sticky,
+                        draggingSticky: $draggingSticky,
+                        viewModel: viewModel
+                    ))
                 }
             }
             .padding(16)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.filteredStickies.map(\.id))
         }
     }
 
@@ -120,5 +184,42 @@ struct StickiesModuleView: View {
             } : nil,
             actionLabel: viewModel.searchText.isEmpty ? "New Sticky" : nil
         )
+    }
+}
+
+// MARK: - Drop Delegate for reordering
+
+struct StickyDropDelegate: DropDelegate {
+    let targetSticky: StickyNote
+    @Binding var draggingSticky: StickyNote?
+    let viewModel: StickiesViewModel
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggingSticky = nil
+        return true
+    }
+
+    func dropEntered(info: DropInfo) {
+        guard let dragging = draggingSticky,
+              dragging.id != targetSticky.id else { return }
+
+        let stickies = viewModel.filteredStickies
+        guard let fromIndex = stickies.firstIndex(where: { $0.id == dragging.id }),
+              let toIndex = stickies.firstIndex(where: { $0.id == targetSticky.id }) else { return }
+
+        Task {
+            await viewModel.moveSticky(
+                from: IndexSet(integer: fromIndex),
+                to: toIndex > fromIndex ? toIndex + 1 : toIndex
+            )
+        }
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func validateDrop(info: DropInfo) -> Bool {
+        draggingSticky != nil
     }
 }

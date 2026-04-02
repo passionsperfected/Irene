@@ -21,6 +21,13 @@ struct IRENESidebar: View {
                 }
                 .padding(.horizontal, 8)
             }
+
+            Spacer(minLength: 0)
+
+            // Mini calendar
+            MiniCalendarView()
+                .padding(.horizontal, 10)
+                .padding(.bottom, 10)
         }
         .background(theme.background)
     }
@@ -43,6 +50,7 @@ struct IRENESidebar: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
+            .contentShape(Rectangle())
             .background(
                 RoundedRectangle(cornerRadius: 6)
                     .fill(selectedModule == module ? theme.accent.opacity(0.12) : Color.clear)

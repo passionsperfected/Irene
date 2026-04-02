@@ -30,6 +30,7 @@
 		151D42AC151DCC4AEFD84567 /* StickyNoteEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D67DE0E336665466B8FD455 /* StickyNoteEditorView.swift */; };
 		160DEB4224ECDF09DA2C42B1 /* VaultConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9827D8B644BCA5E0769D9374 /* VaultConfiguration.swift */; };
 		161F0B74BCA578249D67D5DA /* ToDoQuickCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272AC4862FAD9A679E726A3 /* ToDoQuickCaptureView.swift */; };
+		16A2BB6F66A5CC1F58D78E6D /* FindReplaceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13363C7F0F1059744A87648A /* FindReplaceBar.swift */; };
 		1900AA8953CEF6632ED7456B /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61BA85F7771C15E5DEE178CE /* ChatView.swift */; };
 		19BADC09CA12029E0D6BED26 /* MockProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B195DFA7A4EDF6CCB0AF709 /* MockProvider.swift */; };
 		19D0B06952EDD73D4E3A396E /* CalendarModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200D04DAB6274131AB6DE57 /* CalendarModuleView.swift */; };
@@ -154,6 +155,7 @@
 		AB0CC9DBFC501E0EDC648DB9 /* moonrise.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A65C7702E856F1E0068CC73 /* moonrise.json */; };
 		AC6BA27EA3052612F7A4E3C9 /* LLMResponseChunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69D3D97AFBBC92B92E98C1B7 /* LLMResponseChunk.swift */; };
 		AD0EAFE69020E9F1970E6DE7 /* ConversationListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7223F2901339BAB6D5E3B5A /* ConversationListViewModel.swift */; };
+		AE50AF568B83BE8CEE8E5673 /* MiniCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046FFFC5808D996AEA6648F5 /* MiniCalendarView.swift */; };
 		AEC5AA303125B9AF6FADD136 /* RecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A73AF5081ED8D581025220C0 /* RecordingSession.swift */; };
 		AF45118ED1CA0EAD52AF71A7 /* FileTreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CD5D3A31F207F13E27255A /* FileTreeNode.swift */; };
 		B100A7C7D825CC14A2BDA4C2 /* citrus-slate.json in Resources */ = {isa = PBXBuildFile; fileRef = B7210BEE3B922173528356C8 /* citrus-slate.json */; };
@@ -168,6 +170,7 @@
 		B5E0F6F7288F03E015F46315 /* NoteAIAssistantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7120C3DBD56B0F12F04A4069 /* NoteAIAssistantView.swift */; };
 		B628AB073E123056C4DC9A3C /* ToDoModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE8BCE1AFF50E6D266713A6 /* ToDoModuleView.swift */; };
 		B78CB0567B60066DCC5BE0FE /* ThemeDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8971CD81FB615C015ABDCF44 /* ThemeDefinition.swift */; };
+		BA786EA757F1DB0942D8BBFE /* FindReplaceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13363C7F0F1059744A87648A /* FindReplaceBar.swift */; };
 		BBF9E83C2AF596EA7F6355D7 /* ThemeToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5A2CFCD516EBC8FA2BDDD7 /* ThemeToken.swift */; };
 		BC00D415E8394AEB38A2C97C /* FileTreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CD5D3A31F207F13E27255A /* FileTreeNode.swift */; };
 		C06A75B4788E1EFC41180B8F /* MailBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4185F3A1B1CAC37CCD80AF3 /* MailBridge.swift */; };
@@ -178,6 +181,7 @@
 		C606C55FFD7D2359909D658F /* MailMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27B6F5E388C7787EE3E8E74 /* MailMessage.swift */; };
 		C617F7EBA972615797ED037B /* RecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A73AF5081ED8D581025220C0 /* RecordingSession.swift */; };
 		C720A1F63DF34F7ABB0971B0 /* SystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4812F7D06942CF626D6F94 /* SystemPrompt.swift */; };
+		C8E1A2ABBC507F76BCE0FEDF /* MiniCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046FFFC5808D996AEA6648F5 /* MiniCalendarView.swift */; };
 		C94DBF459917B8C5529C111C /* obsidian-copper.json in Resources */ = {isa = PBXBuildFile; fileRef = 4D100D7A36A7C4530CF4CE91 /* obsidian-copper.json */; };
 		C966F27EB77068C042C8131D /* IRENEApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1BF45E4CC4FE04BA4D00F9 /* IRENEApp.swift */; };
 		CA4DDF8B47CC5BC6EB606112 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816A06510D079EDC6452C26E /* ChatViewModel.swift */; };
@@ -246,12 +250,14 @@
 		0208FDACBFFE2F9C9D9BF1C6 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		020B3539392CA66DE2382EEA /* ChatBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubbleView.swift; sourceTree = "<group>"; };
 		045A69EA0D3A4743C4B7A238 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
+		046FFFC5808D996AEA6648F5 /* MiniCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniCalendarView.swift; sourceTree = "<group>"; };
 		0A65C7702E856F1E0068CC73 /* moonrise.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = moonrise.json; sourceTree = "<group>"; };
 		0B4812F7D06942CF626D6F94 /* SystemPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPrompt.swift; sourceTree = "<group>"; };
 		0D04F0BD60E278DA8BD232FE /* cloud-sky.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "cloud-sky.json"; sourceTree = "<group>"; };
 		0D67DE0E336665466B8FD455 /* StickyNoteEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyNoteEditorView.swift; sourceTree = "<group>"; };
 		107E56C75FE581A9C3EF43C0 /* LLMModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMModel.swift; sourceTree = "<group>"; };
 		122B3C047B9CFDAB484C8B0E /* MarkdownRendererView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRendererView.swift; sourceTree = "<group>"; };
+		13363C7F0F1059744A87648A /* FindReplaceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindReplaceBar.swift; sourceTree = "<group>"; };
 		1513BFE87B59E6E5354AF133 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
 		183606BAF2FB2698B5BADB3E /* lavender-pearl.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "lavender-pearl.json"; sourceTree = "<group>"; };
 		1C4C10FA58F7127AD9DDBD9D /* IRENE_macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IRENE_macOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -455,6 +461,7 @@
 				B5CD5D3A31F207F13E27255A /* FileTreeNode.swift */,
 				2C3350AC198AC68710F888B8 /* FileTreeView.swift */,
 				1C855CD02F324FC72F2BF3E8 /* FileTreeViewModel.swift */,
+				13363C7F0F1059744A87648A /* FindReplaceBar.swift */,
 				122B3C047B9CFDAB484C8B0E /* MarkdownRendererView.swift */,
 				7120C3DBD56B0F12F04A4069 /* NoteAIAssistantView.swift */,
 				727E0E914A0137CC8DDED273 /* NotesModuleView.swift */,
@@ -521,6 +528,7 @@
 			children = (
 				6BA52E4B888A8623C067209D /* EmptyStateView.swift */,
 				6BEE62202B2D02E44F99047E /* IRENESidebar.swift */,
+				046FFFC5808D996AEA6648F5 /* MiniCalendarView.swift */,
 				EC30CDDA3C54BEC9068A21DF /* SearchBar.swift */,
 				F5143FA2243D76348C155CA6 /* TagEditor.swift */,
 			);
@@ -946,6 +954,7 @@
 				BC00D415E8394AEB38A2C97C /* FileTreeNode.swift in Sources */,
 				B5D0E3092B8CE0F819917842 /* FileTreeView.swift in Sources */,
 				DE2FC3F55AF3BCAA54B4C4D3 /* FileTreeViewModel.swift in Sources */,
+				BA786EA757F1DB0942D8BBFE /* FindReplaceBar.swift in Sources */,
 				728944285A839E84BBD28E28 /* GlobalHotkey.swift in Sources */,
 				9DF0A59BFB884B46F02A8C5E /* HotkeyPanel.swift in Sources */,
 				9F5CE6FC25B8A5546C65CA9E /* IRENEApp.swift in Sources */,
@@ -967,6 +976,7 @@
 				681BA0D084035FDCC543A268 /* MarkdownRendererView.swift in Sources */,
 				FDAC5C0B79D974AA31CF4041 /* MarkdownStorage.swift in Sources */,
 				8CC52D7CAD8C468E955655F0 /* MetadataStore.swift in Sources */,
+				AE50AF568B83BE8CEE8E5673 /* MiniCalendarView.swift in Sources */,
 				0EAFA5CF1E6D05A697C41D2F /* MockProvider.swift in Sources */,
 				487EC2DBE6E9D503F1FDE6AE /* Note.swift in Sources */,
 				B5E0F6F7288F03E015F46315 /* NoteAIAssistantView.swift in Sources */,
@@ -1052,6 +1062,7 @@
 				AF45118ED1CA0EAD52AF71A7 /* FileTreeNode.swift in Sources */,
 				9C519DF2E2A469421FC633EB /* FileTreeView.swift in Sources */,
 				06165281E3AD7EF35CDA9528 /* FileTreeViewModel.swift in Sources */,
+				16A2BB6F66A5CC1F58D78E6D /* FindReplaceBar.swift in Sources */,
 				40DD93C2BBDA471983CBD4C6 /* GlobalHotkey.swift in Sources */,
 				DAB9C8958DEEB95B5C2696B0 /* HotkeyPanel.swift in Sources */,
 				C966F27EB77068C042C8131D /* IRENEApp.swift in Sources */,
@@ -1073,6 +1084,7 @@
 				801EBD13538E74096D02291F /* MarkdownRendererView.swift in Sources */,
 				2A7641E2BC5695622DA04B28 /* MarkdownStorage.swift in Sources */,
 				63440265560B62F7C42258A9 /* MetadataStore.swift in Sources */,
+				C8E1A2ABBC507F76BCE0FEDF /* MiniCalendarView.swift in Sources */,
 				19BADC09CA12029E0D6BED26 /* MockProvider.swift in Sources */,
 				D8D2AF836B261B80CC4C015E /* Note.swift in Sources */,
 				8A287C2958DAA2E19386FD41 /* NoteAIAssistantView.swift in Sources */,

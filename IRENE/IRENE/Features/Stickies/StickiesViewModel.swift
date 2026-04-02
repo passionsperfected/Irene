@@ -80,6 +80,20 @@ final class StickiesViewModel {
         try? await saveSticky(updated)
     }
 
+    func moveSticky(from source: IndexSet, to destination: Int) async {
+        var ordered = filteredStickies
+        ordered.move(fromOffsets: source, toOffset: destination)
+
+        // Update sortOrder for all items
+        for (index, var sticky) in ordered.enumerated() {
+            sticky.sortOrder = index
+            if let i = stickies.firstIndex(where: { $0.id == sticky.id }) {
+                stickies[i].sortOrder = index
+                try? await saveSticky(stickies[i])
+            }
+        }
+    }
+
     func deleteSticky(_ sticky: StickyNote) async {
         do {
             let dir = try vaultManager.directoryURL(for: .stickyNote)
