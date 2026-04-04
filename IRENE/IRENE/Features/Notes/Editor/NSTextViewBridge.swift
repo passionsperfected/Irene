@@ -73,22 +73,6 @@ final class NSTextViewBridge: EditorFindDelegate {
         textView.isAutomaticSpellingCorrectionEnabled = false
         textView.isAutomaticLinkDetectionEnabled = false
         textView.smartInsertDeleteEnabled = false
-
-        // Disable drag-and-drop — prevents + cursor on Option for drag operations
-        textView.unregisterDraggedTypes()
-
-        // Remove cursor-related tracking areas that NSTextView uses to show + cursor
-        for area in textView.trackingAreas where area.options.contains(.cursorUpdate) {
-            textView.removeTrackingArea(area)
-        }
-        // Add our own tracking area that always uses I-beam
-        let ibeamArea = NSTrackingArea(
-            rect: .zero,
-            options: [.cursorUpdate, .activeInKeyWindow, .inVisibleRect],
-            owner: IBeamCursorTracker.shared,
-            userInfo: nil
-        )
-        textView.addTrackingArea(ibeamArea)
     }
 
     // MARK: - EditorFindDelegate
@@ -734,17 +718,10 @@ final class NSTextViewBridge: EditorFindDelegate {
     // MARK: - Column Selection (Option+Drag via mouse event monitor)
 
     private func installMouseMonitor() {
-        mouseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .leftMouseDragged, .leftMouseUp, .flagsChanged, .mouseMoved]) { [weak self] event in
+        mouseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .leftMouseDragged, .leftMouseUp]) { [weak self] event in
             guard let self, let textView = self.textView else { return event }
-
-            if event.type == .flagsChanged || event.type == .mouseMoved {
-                return event
-            }
-
-            // Only handle when our textView's window is key
             guard textView.window?.isKeyWindow == true else { return event }
 
-            // Check if click is within our textView
             let locationInTextView = textView.convert(event.locationInWindow, from: nil)
             guard textView.bounds.contains(locationInTextView) else {
                 if self.isColumnDragging {
@@ -755,21 +732,17 @@ final class NSTextViewBridge: EditorFindDelegate {
 
             switch event.type {
             case .leftMouseDown:
-                if event.modifierFlags.contains(.option) {
-                    // Start column selection
+                // Command+click starts column selection
+                if event.modifierFlags.contains(.command) {
                     if self.isMultiEditing { self.exitMultiEdit() }
                     self.savedCursorColor = self.savedCursorColor ?? textView.insertionPointColor
                     self.columnDragStart = locationInTextView
                     self.isColumnDragging = true
 
-                    // Move native cursor to click position (prevents ghost at old position)
+                    // Move native cursor to click position (prevents ghost)
                     let charIndex = textView.characterIndexForInsertion(at: locationInTextView)
                     textView.setSelectedRange(NSRange(location: charIndex, length: 0))
-
-                    // Hide the native text insertion point
                     textView.insertionPointColor = .clear
-
-                    NSCursor.iBeam.set()
 
                     return nil // consume
                 } else {
@@ -781,14 +754,13 @@ final class NSTextViewBridge: EditorFindDelegate {
 
             case .leftMouseDragged:
                 if self.isColumnDragging, let start = self.columnDragStart {
-                    NSCursor.iBeam.set()
                     self.showColumnPreview(from: start, to: locationInTextView)
                     return nil // consume
                 }
                 return event
 
             case .leftMouseUp:
-                if self.isColumnDragging, let start = self.columnDragStart {
+                if self.isColumnDragging {
                     self.finalizeColumnDrag(at: locationInTextView)
                     return nil // consume
                 }
@@ -923,16 +895,6 @@ final class NSTextViewBridge: EditorFindDelegate {
     }
 
     nonisolated deinit {
-    }
-}
-
-// MARK: - Tracking area owner that always sets I-beam cursor
-
-class IBeamCursorTracker: NSObject, @unchecked Sendable {
-    nonisolated(unsafe) static let shared = IBeamCursorTracker()
-
-    @objc func cursorUpdate(with event: NSEvent) {
-        NSCursor.iBeam.set()
     }
 }
 
