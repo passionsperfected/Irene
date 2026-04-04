@@ -7,6 +7,9 @@ struct NotesModuleView: View {
     @State private var treeViewModel: FileTreeViewModel?
     @State private var editorViewModel: FileEditorViewModel?
     @State private var lastSelectedFile: URL?
+    @State private var showGlobalSearch = false
+    @State private var globalSearchVM: GlobalSearchViewModel?
+    @State private var pendingScrollToLine: Int?
 
     @Environment(\.ireneTheme) private var theme
 
@@ -35,8 +38,23 @@ struct NotesModuleView: View {
     #if os(macOS)
     private func editorLayout(_ treeVM: FileTreeViewModel) -> some View {
         HStack(spacing: 0) {
-            FileTreeView(viewModel: treeVM)
-                .frame(width: 240)
+            // Left panel: file tree or global search
+            if showGlobalSearch, let gsVM = globalSearchVM {
+                GlobalSearchView(
+                    viewModel: gsVM,
+                    onSelectResult: { url, line in
+                        treeVM.selectedFile = url
+                        pendingScrollToLine = line
+                    },
+                    onClose: { showGlobalSearch = false }
+                )
+                .frame(minWidth: 280, maxWidth: 320)
+                .frame(maxHeight: .infinity)
+            } else {
+                FileTreeView(viewModel: treeVM)
+                    .frame(minWidth: 240, maxWidth: 240)
+                    .frame(maxHeight: .infinity)
+            }
 
             Divider().overlay(theme.border.opacity(0.3))
 
@@ -45,6 +63,7 @@ struct NotesModuleView: View {
                     renameCurrentFile(newName, treeVM: treeVM, editorVM: editorVM)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
                 .id(editorVM.fileURL)
             } else {
                 EmptyStateView(
@@ -58,6 +77,18 @@ struct NotesModuleView: View {
         }
         .onChange(of: treeVM.selectionGeneration) { _, _ in
             handleFileSelection(treeVM.selectedFile)
+        }
+        .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    if globalSearchVM == nil {
+                        globalSearchVM = GlobalSearchViewModel(rootURL: treeVM.rootURL)
+                    }
+                    showGlobalSearch.toggle()
+                } label: { EmptyView() }
+                .keyboardShortcut("f", modifiers: [.command, .shift])
+                .hidden()
+            }
         }
     }
     #else
@@ -104,7 +135,9 @@ struct NotesModuleView: View {
         do {
             try FileManager.default.moveItem(at: url, to: newURL)
             // Set new editor BEFORE scan to prevent onChange from creating a stale one
-            editorViewModel = FileEditorViewModel(fileURL: newURL)
+            let vm = FileEditorViewModel(fileURL: newURL)
+            vm.load()
+            editorViewModel = vm
             treeVM.selectedFile = newURL
             treeVM.scan()
         } catch {
@@ -126,7 +159,9 @@ struct NotesModuleView: View {
         }
 
         if let newFile {
-            editorViewModel = FileEditorViewModel(fileURL: newFile)
+            let vm = FileEditorViewModel(fileURL: newFile)
+            vm.load()  // Load content BEFORE the view is created
+            editorViewModel = vm
             lastSelectedFile = newFile
         } else {
             editorViewModel = nil

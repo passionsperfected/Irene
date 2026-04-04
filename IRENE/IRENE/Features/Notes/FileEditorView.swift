@@ -11,6 +11,20 @@ struct FileEditorView: View {
     @State private var showFindReplace = false
     @State private var isEditingName = false
     @State private var editingName = ""
+    @State private var cursorLine: Int = 1
+    @State private var cursorColumn: Int = 1
+    @AppStorage("irene.editor.fontSize") private var fontSize: Double = 14
+    #if os(macOS)
+    @State private var bridge = NSTextViewBridge()
+    #endif
+
+    private var findDelegate: (any EditorFindDelegate)? {
+        #if os(macOS)
+        return bridge
+        #else
+        return nil
+        #endif
+    }
 
     private enum FocusField {
         case editor
@@ -28,9 +42,7 @@ struct FileEditorView: View {
                     FindReplaceBar(
                         isVisible: $showFindReplace,
                         content: viewModel.contentBinding,
-                        onHighlightMatches: { matches, currentIndex in
-                            highlightMatches(matches, currentIndex: currentIndex)
-                        }
+                        findDelegate: findDelegate
                     )
                 }
 
@@ -40,7 +52,7 @@ struct FileEditorView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     TextEditor(text: viewModel.contentBinding)
-                        .font(.system(size: 14, design: .monospaced))
+                        .font(.system(size: fontSize, design: .monospaced))
                         .foregroundStyle(theme.primaryText)
                         .scrollContentBackground(.hidden)
                         .focused($focusedField, equals: .editor)
@@ -49,6 +61,16 @@ struct FileEditorView: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .onAppear {
+                            #if os(macOS)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                bridge.reattach(window: NSApplication.shared.keyWindow, theme: theme)
+                                bridge.onContentChanged = { newContent in
+                                    viewModel.content = newContent
+                                }
+                            }
+                            #endif
+                        }
                 }
 
                 bottomBar
@@ -67,12 +89,6 @@ struct FileEditorView: View {
         .background(theme.background)
         .onAppear {
             viewModel.load()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                focusedField = .editor
-                #if os(macOS)
-                disableSmartEditing()
-                #endif
-            }
         }
         .onDisappear {
             Task {
@@ -80,7 +96,6 @@ struct FileEditorView: View {
             }
         }
         .toolbar {
-            // Hidden buttons just for keyboard shortcuts
             ToolbarItem(placement: .automatic) {
                 Button {
                     withAnimation(.easeInOut(duration: 0.15)) {
@@ -103,6 +118,22 @@ struct FileEditorView: View {
                 .keyboardShortcut("h", modifiers: [.command, .option])
                 .hidden()
             }
+            // Font size shortcuts
+            ToolbarItem(placement: .automatic) {
+                Button { fontSize = min(fontSize + 1, 32) } label: { EmptyView() }
+                    .keyboardShortcut("+", modifiers: .command)
+                    .hidden()
+            }
+            ToolbarItem(placement: .automatic) {
+                Button { fontSize = min(fontSize + 1, 32) } label: { EmptyView() }
+                    .keyboardShortcut("=", modifiers: .command)
+                    .hidden()
+            }
+            ToolbarItem(placement: .automatic) {
+                Button { fontSize = max(fontSize - 1, 9) } label: { EmptyView() }
+                    .keyboardShortcut("-", modifiers: .command)
+                    .hidden()
+            }
         }
     }
 
@@ -110,7 +141,6 @@ struct FileEditorView: View {
 
     private var toolbar: some View {
         HStack(spacing: 12) {
-            // File icon + editable name
             HStack(spacing: 6) {
                 Image(systemName: viewModel.fileType?.iconName ?? "doc")
                     .font(.system(size: 12))
@@ -149,10 +179,8 @@ struct FileEditorView: View {
 
             Spacer()
 
-            // Contextual buttons based on file type
             contextualButtons
 
-            // AI assistant toggle
             if llmService != nil {
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -170,7 +198,6 @@ struct FileEditorView: View {
                 .help("Ask IRENE about this file")
             }
 
-            // Save indicator
             if viewModel.isSaving {
                 ProgressView()
                     .controlSize(.small)
@@ -183,7 +210,6 @@ struct FileEditorView: View {
     // MARK: - Rename
 
     private func startRename() {
-        // Pre-fill with the full filename including extension
         editingName = viewModel.fileName
         isEditingName = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
@@ -196,21 +222,17 @@ struct FileEditorView: View {
         isEditingName = false
 
         guard !newName.isEmpty, newName != viewModel.fileName else {
-            focusedField = .editor
             return
         }
 
-        // Save current content, then rename
         Task {
             await viewModel.saveImmediately()
             onRename?(newName)
-            focusedField = .editor
         }
     }
 
     private func cancelRename() {
         isEditingName = false
-        focusedField = .editor
     }
 
     // MARK: - Contextual Buttons
@@ -263,7 +285,6 @@ struct FileEditorView: View {
 
     private var bottomBar: some View {
         VStack(spacing: 0) {
-            // Error message bar
             if let error = viewModel.errorMessage {
                 HStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle.fill")
@@ -290,7 +311,6 @@ struct FileEditorView: View {
             Divider().overlay(theme.border.opacity(0.3))
 
             HStack(spacing: 16) {
-                // File type badge
                 Text(viewModel.fileExtension.uppercased())
                     .font(Typography.caption(size: 9))
                     .foregroundStyle(theme.accent)
@@ -301,7 +321,11 @@ struct FileEditorView: View {
 
                 Spacer()
 
-                Text("Ln \(viewModel.lineCount)")
+                Text("\(Int(fontSize))px")
+                    .font(Typography.caption(size: 10))
+                    .foregroundStyle(theme.secondaryText.opacity(0.5))
+
+                Text("Ln \(cursorLine), Col \(cursorColumn)")
                     .font(Typography.caption(size: 10))
                     .foregroundStyle(theme.secondaryText.opacity(0.5))
 
@@ -318,91 +342,4 @@ struct FileEditorView: View {
         }
     }
 
-    // MARK: - Disable macOS Smart Editing
-
-    // MARK: - macOS NSTextView helpers
-
-    #if os(macOS)
-    private func disableSmartEditing() {
-        guard let textView = findNSTextView() else { return }
-        textView.isAutomaticQuoteSubstitutionEnabled = false
-        textView.isAutomaticDashSubstitutionEnabled = false
-        textView.isAutomaticTextReplacementEnabled = false
-        textView.isAutomaticSpellingCorrectionEnabled = false
-        textView.isAutomaticLinkDetectionEnabled = false
-        textView.smartInsertDeleteEnabled = false
-    }
-
-    private func highlightMatches(_ matches: [Range<String.Index>], currentIndex: Int) {
-        guard let textView = findNSTextView(),
-              let layoutManager = textView.layoutManager,
-              let textStorage = textView.textStorage else { return }
-
-        let content = textView.string
-
-        // Clear old highlights
-        let fullRange = NSRange(location: 0, length: textStorage.length)
-        textStorage.removeAttribute(.backgroundColor, range: fullRange)
-
-        guard !matches.isEmpty else { return }
-
-        // Highlight all matches with a dim color
-        let highlightColor = NSColor(theme.accent.opacity(0.2))
-        let currentColor = NSColor(theme.accent.opacity(0.5))
-
-        for (index, range) in matches.enumerated() {
-            guard let nsRange = Range(uncheckedBounds: (range.lowerBound, range.upperBound))
-                    .relative(to: content)
-                    .toNSRange(in: content) else { continue }
-
-            if currentIndex == -1 {
-                // "Find All" — highlight all with strong color
-                textStorage.addAttribute(.backgroundColor, value: currentColor, range: nsRange)
-            } else if index == currentIndex {
-                // Current match — strong highlight
-                textStorage.addAttribute(.backgroundColor, value: currentColor, range: nsRange)
-                // Scroll to current match
-                textView.scrollRangeToVisible(nsRange)
-            } else {
-                // Other matches — dim highlight
-                textStorage.addAttribute(.backgroundColor, value: highlightColor, range: nsRange)
-            }
-        }
-    }
-
-    private func findNSTextView() -> NSTextView? {
-        guard let window = NSApplication.shared.keyWindow else { return nil }
-        return findTextViewIn(window.contentView)
-    }
-
-    private func findTextViewIn(_ view: NSView?) -> NSTextView? {
-        guard let view else { return nil }
-        if let textView = view as? NSTextView, textView.isEditable {
-            return textView
-        }
-        for subview in view.subviews {
-            if let found = findTextViewIn(subview) {
-                return found
-            }
-        }
-        return nil
-    }
-    #else
-    private func highlightMatches(_ matches: [Range<String.Index>], currentIndex: Int) {
-        // iOS: no NSTextView, highlighting not supported in SwiftUI TextEditor
-    }
-    #endif
 }
-
-// MARK: - Range helper
-
-private extension Range where Bound == String.Index {
-    func toNSRange(in string: String) -> NSRange? {
-        guard let lower = lowerBound.samePosition(in: string.utf16),
-              let upper = upperBound.samePosition(in: string.utf16) else { return nil }
-        let location = string.utf16.distance(from: string.utf16.startIndex, to: lower)
-        let length = string.utf16.distance(from: lower, to: upper)
-        return NSRange(location: location, length: length)
-    }
-}
-

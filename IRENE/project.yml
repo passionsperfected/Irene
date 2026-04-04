@@ -90,6 +90,9 @@ targets:
     settings:
       base:
         SWIFT_VERSION: "6.0"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/IRENE.app/Contents/MacOS/IRENE"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        GENERATE_INFOPLIST_FILE: true
 
   IRENETests_iOS:
     type: bundle.unit-test

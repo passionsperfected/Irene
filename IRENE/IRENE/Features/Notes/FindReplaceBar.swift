@@ -3,7 +3,7 @@ import SwiftUI
 struct FindReplaceBar: View {
     @Binding var isVisible: Bool
     @Binding var content: String
-    var onHighlightMatches: (([Range<String.Index>], Int) -> Void)?
+    var findDelegate: (any EditorFindDelegate)?
 
     @State private var findText: String = ""
     @State private var replaceText: String = ""
@@ -24,7 +24,6 @@ struct FindReplaceBar: View {
         VStack(spacing: 4) {
             // Find row
             HStack(spacing: 5) {
-                // Toggle replace chevron
                 Button {
                     showReplace.toggle()
                 } label: {
@@ -35,7 +34,6 @@ struct FindReplaceBar: View {
                 .buttonStyle(.plain)
                 .frame(width: 14)
 
-                // Find field
                 TextField("Find", text: $findText)
                     .font(.system(size: 12, design: .monospaced))
                     .textFieldStyle(.plain)
@@ -57,7 +55,6 @@ struct FindReplaceBar: View {
                             )
                     )
 
-                // Match count badge
                 if !findText.isEmpty {
                     Text(matches.isEmpty ? "0" : "\(currentMatchIndex + 1)/\(matches.count)")
                         .font(.system(size: 9, design: .monospaced))
@@ -65,7 +62,6 @@ struct FindReplaceBar: View {
                         .frame(minWidth: 32)
                 }
 
-                // Prev / Next
                 Button { findPrevious() } label: {
                     Image(systemName: "chevron.up")
                         .font(.system(size: 9, weight: .semibold))
@@ -84,8 +80,7 @@ struct FindReplaceBar: View {
                 .disabled(matches.isEmpty)
                 .keyboardShortcut("g", modifiers: .command)
 
-                // Find All
-                Button { selectAll() } label: {
+                Button { selectAllMatches() } label: {
                     Text("All")
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
                         .padding(.horizontal, 5)
@@ -94,14 +89,12 @@ struct FindReplaceBar: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(matches.isEmpty ? theme.secondaryText.opacity(0.2) : theme.accent)
                 .disabled(matches.isEmpty)
-                .help("Select All Matches")
+                .help("Select All Matches (multi-cursor)")
 
-                // Separator
                 Rectangle()
                     .fill(theme.border.opacity(0.3))
                     .frame(width: 1, height: 14)
 
-                // Case sensitive
                 Button {
                     caseSensitive.toggle()
                     updateMatches()
@@ -116,7 +109,6 @@ struct FindReplaceBar: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(caseSensitive ? theme.accent : theme.secondaryText.opacity(0.5))
 
-                // Regex
                 Button {
                     useRegex.toggle()
                     updateMatches()
@@ -131,7 +123,6 @@ struct FindReplaceBar: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(useRegex ? theme.accent : theme.secondaryText.opacity(0.5))
 
-                // Close
                 Button { close() } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 9))
@@ -141,10 +132,9 @@ struct FindReplaceBar: View {
                 .keyboardShortcut(.escape, modifiers: [])
             }
 
-            // Replace row (compact)
             if showReplace {
                 HStack(spacing: 5) {
-                    Color.clear.frame(width: 14) // align with chevron
+                    Color.clear.frame(width: 14)
 
                     TextField("Replace", text: $replaceText)
                         .font(.system(size: 12, design: .monospaced))
@@ -161,7 +151,6 @@ struct FindReplaceBar: View {
                                 .strokeBorder(theme.border.opacity(0.3), lineWidth: 1)
                         )
 
-                    // Replace one
                     Button { replaceCurrent() } label: {
                         Image(systemName: "arrow.right.arrow.left")
                             .font(.system(size: 9))
@@ -171,7 +160,6 @@ struct FindReplaceBar: View {
                     .disabled(matches.isEmpty)
                     .help("Replace")
 
-                    // Replace all
                     Button { replaceAll() } label: {
                         Text("Replace All")
                             .font(.system(size: 9, weight: .medium, design: .monospaced))
@@ -257,16 +245,21 @@ struct FindReplaceBar: View {
         notifyHighlight()
     }
 
-    private func selectAll() {
-        // Notify parent to highlight all matches (select all in NSTextView)
-        onHighlightMatches?(matches, -1) // -1 means all
+    private func selectAllMatches() {
+        let nsRanges = matches.compactMap { range -> NSRange? in
+            NSRange(range, in: content)
+        }
+        findDelegate?.selectAllMatches(nsRanges)
     }
 
     private func notifyHighlight() {
-        onHighlightMatches?(matches, currentMatchIndex)
+        let nsRanges = matches.compactMap { range -> NSRange? in
+            NSRange(range, in: content)
+        }
+        findDelegate?.highlightMatches(nsRanges, currentIndex: currentMatchIndex)
     }
 
-    // MARK: - Replace Logic
+    // MARK: - Replace
 
     private func replaceCurrent() {
         guard !matches.isEmpty, currentMatchIndex < matches.count else { return }
@@ -287,7 +280,7 @@ struct FindReplaceBar: View {
     }
 
     private func close() {
-        onHighlightMatches?([], 0) // Clear highlights
+        findDelegate?.clearHighlights()
         withAnimation(.easeOut(duration: 0.15)) {
             isVisible = false
         }

@@ -36,7 +36,7 @@ struct MiniCalendarView: View {
 
             // Day of week headers
             HStack(spacing: 0) {
-                ForEach(dayOfWeekLabels, id: \.self) { label in
+                ForEach(Array(dayOfWeekLabels.enumerated()), id: \.offset) { _, label in
                     Text(label)
                         .font(Typography.caption(size: 8))
                         .foregroundStyle(theme.secondaryText.opacity(0.4))
@@ -47,7 +47,7 @@ struct MiniCalendarView: View {
             // Day grid
             let days = daysInMonth()
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 2) {
-                ForEach(days, id: \.self) { day in
+                ForEach(Array(days.enumerated()), id: \.offset) { _, day in
                     if let day {
                         dayCell(day)
                     } else {
