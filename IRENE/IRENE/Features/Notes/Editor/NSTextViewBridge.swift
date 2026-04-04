@@ -73,6 +73,22 @@ final class NSTextViewBridge: EditorFindDelegate {
         textView.isAutomaticSpellingCorrectionEnabled = false
         textView.isAutomaticLinkDetectionEnabled = false
         textView.smartInsertDeleteEnabled = false
+
+        // Disable drag-and-drop — prevents + cursor on Option for drag operations
+        textView.unregisterDraggedTypes()
+
+        // Remove cursor-related tracking areas that NSTextView uses to show + cursor
+        for area in textView.trackingAreas where area.options.contains(.cursorUpdate) {
+            textView.removeTrackingArea(area)
+        }
+        // Add our own tracking area that always uses I-beam
+        let ibeamArea = NSTrackingArea(
+            rect: .zero,
+            options: [.cursorUpdate, .activeInKeyWindow, .inVisibleRect],
+            owner: IBeamCursorTracker.shared,
+            userInfo: nil
+        )
+        textView.addTrackingArea(ibeamArea)
     }
 
     // MARK: - EditorFindDelegate
@@ -721,15 +737,7 @@ final class NSTextViewBridge: EditorFindDelegate {
         mouseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .leftMouseDragged, .leftMouseUp, .flagsChanged, .mouseMoved]) { [weak self] event in
             guard let self, let textView = self.textView else { return event }
 
-            if event.type == .flagsChanged {
-                if event.modifierFlags.contains(.option) {
-                    self.startForcingIBeamCursor()
-                } else if !self.isColumnDragging {
-                    self.stopForcingIBeamCursor()
-                }
-                return event
-            }
-            if event.type == .mouseMoved {
+            if event.type == .flagsChanged || event.type == .mouseMoved {
                 return event
             }
 
@@ -740,7 +748,6 @@ final class NSTextViewBridge: EditorFindDelegate {
             let locationInTextView = textView.convert(event.locationInWindow, from: nil)
             guard textView.bounds.contains(locationInTextView) else {
                 if self.isColumnDragging {
-                    self.stopForcingIBeamCursor()
                     self.finalizeColumnDrag(at: locationInTextView)
                 }
                 return event
@@ -762,8 +769,6 @@ final class NSTextViewBridge: EditorFindDelegate {
                     // Hide the native text insertion point
                     textView.insertionPointColor = .clear
 
-                    // Force I-beam throughout the drag
-                    self.startForcingIBeamCursor()
                     NSCursor.iBeam.set()
 
                     return nil // consume
@@ -784,7 +789,6 @@ final class NSTextViewBridge: EditorFindDelegate {
 
             case .leftMouseUp:
                 if self.isColumnDragging, let start = self.columnDragStart {
-                    self.stopForcingIBeamCursor()
                     self.finalizeColumnDrag(at: locationInTextView)
                     return nil // consume
                 }
@@ -907,44 +911,11 @@ final class NSTextViewBridge: EditorFindDelegate {
         }
     }
 
-    // MARK: - Cursor Override (Option key should not show + cursor)
-
-    private var cursorForceTimer: Timer?
-
-    private func startForcingIBeamCursor() {
-        cursorForceTimer?.invalidate()
-        cursorForceTimer = Timer.scheduledTimer(withTimeInterval: 0.008, repeats: true) { [weak self] _ in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                if self.isColumnDragging || NSEvent.modifierFlags.contains(.option) {
-                    if let textView = self.textView, textView.window?.isKeyWindow == true {
-                        let mouseLocation = NSEvent.mouseLocation
-                        if let windowPoint = textView.window?.convertPoint(fromScreen: mouseLocation) {
-                            let viewPoint = textView.convert(windowPoint, from: nil)
-                            if textView.bounds.contains(viewPoint) {
-                                NSCursor.iBeam.set()
-                                return
-                            }
-                        }
-                    }
-                }
-                // Option not held or mouse not over text view — stop polling
-                if !self.isColumnDragging {
-                    self.stopForcingIBeamCursor()
-                }
-            }
-        }
-    }
-
-    private func stopForcingIBeamCursor() {
-        cursorForceTimer?.invalidate()
-        cursorForceTimer = nil
-    }
+    // MARK: - Cursor Override
 
     // MARK: - Cleanup
 
     func cleanup() {
-        stopForcingIBeamCursor()
         removeCursorOverlays()
         removeEventMonitor()
         removeMouseMonitor()
@@ -952,6 +923,16 @@ final class NSTextViewBridge: EditorFindDelegate {
     }
 
     nonisolated deinit {
+    }
+}
+
+// MARK: - Tracking area owner that always sets I-beam cursor
+
+class IBeamCursorTracker: NSObject, @unchecked Sendable {
+    nonisolated(unsafe) static let shared = IBeamCursorTracker()
+
+    @objc func cursorUpdate(with event: NSEvent) {
+        NSCursor.iBeam.set()
     }
 }
 
