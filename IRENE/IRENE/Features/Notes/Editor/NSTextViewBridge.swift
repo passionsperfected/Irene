@@ -8,12 +8,14 @@ import SwiftUI
 final class NSTextViewBridge: EditorFindDelegate {
     private(set) weak var textView: NSTextView?
     private var eventMonitor: Any?
+    private var mouseMonitor: Any?
     private var themeAdapter: EditorThemeAdapter?
-    private var columnSelectRecognizer: ColumnSelectGestureRecognizer?
     private var cursorOverlays: [NSView] = []
+    private var columnDragStart: NSPoint?
+    private var isColumnDragging = false
     private var cursorBlinkTimer: Timer?
     private var cursorVisible: Bool = true
-    private var savedCursorColor: NSColor?
+    var savedCursorColor: NSColor?
 
     /// Callback to force-sync content after direct NSTextView manipulation
     var onContentChanged: ((String) -> Void)?
@@ -34,7 +36,7 @@ final class NSTextViewBridge: EditorFindDelegate {
         if let textView {
             disableSmartEditing(textView)
             installEventMonitor()
-            installColumnSelection(on: textView)
+            installMouseMonitor()
         }
     }
 
@@ -341,24 +343,81 @@ final class NSTextViewBridge: EditorFindDelegate {
         }
     }
 
-    enum CursorDirection { case left, right }
+    enum CursorDirection { case left, right, home, end }
 
     private func multiEditMoveCursors(direction: CursorDirection) {
         guard let textView, let textStorage = textView.textStorage else { return }
         let maxLen = textStorage.length
+        let nsString = textView.string as NSString
 
         multiEditRanges = multiEditRanges.map { range in
+            let pos: Int
             switch direction {
             case .left:
-                // Collapse to left edge, then move left 1
-                let pos = max(0, range.location - (range.length == 0 ? 1 : 0))
-                return NSRange(location: pos, length: 0)
+                pos = max(0, range.location - (range.length == 0 ? 1 : 0))
             case .right:
-                // Collapse to right edge, then move right 1
                 let edge = range.location + range.length
-                let pos = min(maxLen, edge + (range.length == 0 ? 1 : 0))
-                return NSRange(location: pos, length: 0)
+                pos = min(maxLen, edge + (range.length == 0 ? 1 : 0))
+            case .home:
+                let lineRange = nsString.lineRange(for: NSRange(location: range.location, length: 0))
+                pos = lineRange.location
+            case .end:
+                let lineRange = nsString.lineRange(for: NSRange(location: range.location, length: 0))
+                let lineEnd = NSMaxRange(lineRange)
+                // Position before the newline, not after it
+                let lineText = nsString.substring(with: lineRange)
+                pos = lineText.hasSuffix("\n") ? lineEnd - 1 : lineEnd
             }
+            return NSRange(location: max(0, min(pos, maxLen)), length: 0)
+        }
+
+        highlightMultiEditRanges()
+        resetCursorBlink()
+
+        if let first = multiEditRanges.first {
+            textView.setSelectedRange(first)
+        }
+    }
+
+    private func multiEditDeleteForward() {
+        guard let textView, let textStorage = textView.textStorage else { return }
+
+        var deleteRanges: [NSRange] = []
+        for range in multiEditRanges {
+            if range.length > 0 {
+                deleteRanges.append(range)
+            } else if range.location < textStorage.length {
+                deleteRanges.append(NSRange(location: range.location, length: 1))
+            }
+        }
+
+        guard !deleteRanges.isEmpty else { return }
+
+        textView.undoManager?.beginUndoGrouping()
+        textStorage.beginEditing()
+
+        for range in deleteRanges.reversed() {
+            guard range.location + range.length <= textStorage.length else { continue }
+            textStorage.replaceCharacters(in: range, with: "")
+        }
+
+        textStorage.endEditing()
+        textView.didChangeText()
+        textView.undoManager?.endUndoGrouping()
+
+        // Cursors stay at same position for forward delete
+        var delta = 0
+        var newRanges: [NSRange] = []
+        for range in multiEditRanges {
+            newRanges.append(NSRange(location: range.location + delta, length: 0))
+            let deleteLen = range.length > 0 ? range.length : 1
+            delta -= deleteLen
+        }
+        multiEditRanges = newRanges
+
+        let content = textView.string
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { [weak self] in
+            self?.onContentChanged?(content)
         }
 
         highlightMultiEditRanges()
@@ -435,7 +494,18 @@ final class NSTextViewBridge: EditorFindDelegate {
                     return nil
                 }
 
-                // Arrow keys FIRST (they have .numericPad/.function flags)
+                // Cmd+Left — move all cursors to beginning of their lines
+                if keyCode == 123 && flags.contains(.command) {
+                    self.multiEditMoveCursors(direction: .home)
+                    return nil
+                }
+                // Cmd+Right — move all cursors to end of their lines
+                if keyCode == 124 && flags.contains(.command) {
+                    self.multiEditMoveCursors(direction: .end)
+                    return nil
+                }
+
+                // Arrow keys (they have .numericPad/.function flags)
                 if keyCode == 123 { // left
                     self.multiEditMoveCursors(direction: .left)
                     return nil
@@ -455,10 +525,34 @@ final class NSTextViewBridge: EditorFindDelegate {
                     return event
                 }
 
-                // Backspace
+                // Backspace / Delete
                 if keyCode == 51 {
                     self.multiEditDeleteBackward()
                     return nil
+                }
+                if keyCode == 117 { // forward delete
+                    self.multiEditDeleteForward()
+                    return nil
+                }
+
+                // Cmd+A (select all) — exit multi-edit, let through
+                if keyCode == 0 && flags.contains(.command) {
+                    self.exitMultiEdit()
+                    return event
+                }
+                // Cmd+Z (undo) — exit multi-edit, let through
+                if keyCode == 6 && flags.contains(.command) {
+                    self.exitMultiEdit()
+                    return event
+                }
+                // Cmd+C/V/X (copy/paste/cut) — exit multi-edit, let through
+                if (keyCode == 8 || keyCode == 9 || keyCode == 7) && flags.contains(.command) {
+                    self.exitMultiEdit()
+                    return event
+                }
+                // Cmd+S (save) — let through without exiting
+                if keyCode == 1 && flags.contains(.command) {
+                    return event
                 }
 
                 // Regular character input (no command/control modifiers)
@@ -469,7 +563,7 @@ final class NSTextViewBridge: EditorFindDelegate {
                     }
                 }
 
-                // Any command-key combo — exit multi-edit, let through
+                // Other command combos — exit and let through
                 if flags.contains(.command) {
                     self.exitMultiEdit()
                     return event
@@ -621,72 +715,239 @@ final class NSTextViewBridge: EditorFindDelegate {
         onContentChanged?(textView.string)
     }
 
-    // MARK: - Column Selection (Option+Drag)
+    // MARK: - Column Selection (Option+Drag via mouse event monitor)
 
-    private func installColumnSelection(on textView: NSTextView) {
-        // Remove old recognizer if any
-        if let old = columnSelectRecognizer {
-            textView.removeGestureRecognizer(old)
+    private func installMouseMonitor() {
+        mouseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .leftMouseDragged, .leftMouseUp, .flagsChanged, .mouseMoved]) { [weak self] event in
+            guard let self, let textView = self.textView else { return event }
+
+            if event.type == .flagsChanged {
+                if event.modifierFlags.contains(.option) {
+                    self.startForcingIBeamCursor()
+                } else if !self.isColumnDragging {
+                    self.stopForcingIBeamCursor()
+                }
+                return event
+            }
+            if event.type == .mouseMoved {
+                return event
+            }
+
+            // Only handle when our textView's window is key
+            guard textView.window?.isKeyWindow == true else { return event }
+
+            // Check if click is within our textView
+            let locationInTextView = textView.convert(event.locationInWindow, from: nil)
+            guard textView.bounds.contains(locationInTextView) else {
+                if self.isColumnDragging {
+                    self.stopForcingIBeamCursor()
+                    self.finalizeColumnDrag(at: locationInTextView)
+                }
+                return event
+            }
+
+            switch event.type {
+            case .leftMouseDown:
+                if event.modifierFlags.contains(.option) {
+                    // Start column selection
+                    if self.isMultiEditing { self.exitMultiEdit() }
+                    self.savedCursorColor = self.savedCursorColor ?? textView.insertionPointColor
+                    self.columnDragStart = locationInTextView
+                    self.isColumnDragging = true
+
+                    // Move native cursor to click position (prevents ghost at old position)
+                    let charIndex = textView.characterIndexForInsertion(at: locationInTextView)
+                    textView.setSelectedRange(NSRange(location: charIndex, length: 0))
+
+                    // Hide the native text insertion point
+                    textView.insertionPointColor = .clear
+
+                    // Force I-beam throughout the drag
+                    self.startForcingIBeamCursor()
+                    NSCursor.iBeam.set()
+
+                    return nil // consume
+                } else {
+                    if self.isMultiEditing {
+                        self.exitMultiEdit()
+                    }
+                    return event
+                }
+
+            case .leftMouseDragged:
+                if self.isColumnDragging, let start = self.columnDragStart {
+                    NSCursor.iBeam.set()
+                    self.showColumnPreview(from: start, to: locationInTextView)
+                    return nil // consume
+                }
+                return event
+
+            case .leftMouseUp:
+                if self.isColumnDragging, let start = self.columnDragStart {
+                    self.stopForcingIBeamCursor()
+                    self.finalizeColumnDrag(at: locationInTextView)
+                    return nil // consume
+                }
+                return event
+
+            default:
+                return event
+            }
         }
-        let recognizer = ColumnSelectGestureRecognizer(bridge: self)
-        textView.addGestureRecognizer(recognizer)
-        columnSelectRecognizer = recognizer
     }
 
-    func applyColumnSelection(from startPoint: NSPoint, to endPoint: NSPoint) {
+    private func removeMouseMonitor() {
+        if let monitor = mouseMonitor {
+            NSEvent.removeMonitor(monitor)
+            mouseMonitor = nil
+        }
+    }
+
+    private func showColumnPreview(from startPoint: NSPoint, to currentPoint: NSPoint) {
+        let ranges = computeColumnRanges(from: startPoint, to: currentPoint)
+        guard ranges.count > 1 else { return }
+
+        removeCursorOverlays()
+        drawCursorOverlays(at: ranges)
+    }
+
+    private func finalizeColumnDrag(at endPoint: NSPoint) {
+        guard let startPoint = columnDragStart else { return }
+        isColumnDragging = false
+        columnDragStart = nil
+
+        let ranges = computeColumnRanges(from: startPoint, to: endPoint)
+        guard ranges.count > 1, let textView else {
+            // Not enough lines — cancel, restore cursor
+            removeCursorOverlays()
+            if let textView {
+                textView.insertionPointColor = savedCursorColor ?? themeAdapter?.cursorColor ?? .systemBlue
+            }
+            savedCursorColor = nil
+            return
+        }
+
+        // Enter multi-edit mode — ONLY with the dragged ranges (no old cursor position)
+        multiEditRanges = ranges
+        isMultiEditing = true
+
+        // The native cursor is already hidden (.clear from mouseDown)
+        highlightMultiEditRanges()
+
+        textView.window?.makeFirstResponder(textView)
+        if let first = ranges.first {
+            textView.setSelectedRange(first)
+        }
+    }
+
+    private func computeColumnRanges(from startPoint: NSPoint, to endPoint: NSPoint) -> [NSRange] {
         guard let textView, let layoutManager = textView.layoutManager,
-              let textContainer = textView.textContainer else { return }
+              let textContainer = textView.textContainer else { return [] }
 
         let nsString = textView.string as NSString
+        guard nsString.length > 0 else { return [] }
         let containerOrigin = textView.textContainerOrigin
 
-        // Convert points to text container coordinates
         let startTC = NSPoint(x: startPoint.x - containerOrigin.x, y: startPoint.y - containerOrigin.y)
         let endTC = NSPoint(x: endPoint.x - containerOrigin.x, y: endPoint.y - containerOrigin.y)
 
-        // Get glyph indices for start and end
         let startGlyph = layoutManager.glyphIndex(for: startTC, in: textContainer)
         let endGlyph = layoutManager.glyphIndex(for: endTC, in: textContainer)
 
         let startChar = layoutManager.characterIndexForGlyph(at: startGlyph)
         let endChar = layoutManager.characterIndexForGlyph(at: endGlyph)
 
-        // Get line ranges
         let startLineRange = nsString.lineRange(for: NSRange(location: startChar, length: 0))
         let endLineRange = nsString.lineRange(for: NSRange(location: endChar, length: 0))
 
         let firstLine = min(startLineRange.location, endLineRange.location)
         let lastLineEnd = max(NSMaxRange(startLineRange), NSMaxRange(endLineRange))
 
-        // Column offset from the start click
+        // Use the X position to determine column rather than character index
+        // This gives proper column alignment in monospaced fonts
         let startCol = startChar - startLineRange.location
 
-        // Build one cursor per line at the target column
-        var selections: [NSValue] = []
+        var ranges: [NSRange] = []
         var pos = firstLine
         while pos < lastLineEnd && pos < nsString.length {
             let lineRange = nsString.lineRange(for: NSRange(location: pos, length: 0))
             let lineLength = lineRange.length - (nsString.substring(with: lineRange).hasSuffix("\n") ? 1 : 0)
             let col = min(startCol, lineLength)
-            let cursorPos = lineRange.location + col
-            selections.append(NSValue(range: NSRange(location: cursorPos, length: 0)))
+            ranges.append(NSRange(location: lineRange.location + col, length: 0))
             pos = NSMaxRange(lineRange)
         }
 
-        if !selections.isEmpty {
-            textView.setSelectedRanges(selections, affinity: .upstream, stillSelecting: false)
+        return ranges
+    }
+
+    private func drawCursorOverlays(at ranges: [NSRange]) {
+        guard let textView, let layoutManager = textView.layoutManager,
+              let textStorage = textView.textStorage else { return }
+
+        let containerOrigin = textView.textContainerOrigin
+        let cursorColor = savedCursorColor ?? themeAdapter?.cursorColor ?? NSColor.systemBlue
+
+        for range in ranges {
+            let charIndex = range.location
+            let safeIndex = min(charIndex, max(textStorage.length - 1, 0))
+            let glyphIndex = layoutManager.glyphIndexForCharacter(at: safeIndex)
+            guard glyphIndex != NSNotFound else { continue }
+
+            let lineRect = layoutManager.lineFragmentRect(forGlyphAt: glyphIndex, effectiveRange: nil)
+            let glyphLocation = layoutManager.location(forGlyphAt: glyphIndex)
+
+            let cursorX = lineRect.origin.x + glyphLocation.x + containerOrigin.x
+            let cursorY = lineRect.origin.y + containerOrigin.y
+
+            let cursorView = NSView(frame: NSRect(x: cursorX, y: cursorY, width: 1, height: lineRect.height))
+            cursorView.wantsLayer = true
+            cursorView.layer?.backgroundColor = cursorColor.cgColor
+            textView.addSubview(cursorView)
+            cursorOverlays.append(cursorView)
         }
+    }
+
+    // MARK: - Cursor Override (Option key should not show + cursor)
+
+    private var cursorForceTimer: Timer?
+
+    private func startForcingIBeamCursor() {
+        cursorForceTimer?.invalidate()
+        cursorForceTimer = Timer.scheduledTimer(withTimeInterval: 0.008, repeats: true) { [weak self] _ in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if self.isColumnDragging || NSEvent.modifierFlags.contains(.option) {
+                    if let textView = self.textView, textView.window?.isKeyWindow == true {
+                        let mouseLocation = NSEvent.mouseLocation
+                        if let windowPoint = textView.window?.convertPoint(fromScreen: mouseLocation) {
+                            let viewPoint = textView.convert(windowPoint, from: nil)
+                            if textView.bounds.contains(viewPoint) {
+                                NSCursor.iBeam.set()
+                                return
+                            }
+                        }
+                    }
+                }
+                // Option not held or mouse not over text view — stop polling
+                if !self.isColumnDragging {
+                    self.stopForcingIBeamCursor()
+                }
+            }
+        }
+    }
+
+    private func stopForcingIBeamCursor() {
+        cursorForceTimer?.invalidate()
+        cursorForceTimer = nil
     }
 
     // MARK: - Cleanup
 
     func cleanup() {
+        stopForcingIBeamCursor()
         removeCursorOverlays()
         removeEventMonitor()
-        if let textView, let recognizer = columnSelectRecognizer {
-            textView.removeGestureRecognizer(recognizer)
-        }
-        columnSelectRecognizer = nil
+        removeMouseMonitor()
         textView = nil
     }
 
@@ -694,50 +955,4 @@ final class NSTextViewBridge: EditorFindDelegate {
     }
 }
 
-// MARK: - Column Select Gesture Recognizer
-
-class ColumnSelectGestureRecognizer: NSGestureRecognizer {
-    private weak var bridge: NSTextViewBridge?
-    private var startPoint: NSPoint = .zero
-
-    init(bridge: NSTextViewBridge) {
-        self.bridge = bridge
-        super.init(target: nil, action: nil)
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError()
-    }
-
-    override func mouseDown(with event: NSEvent) {
-        guard event.modifierFlags.contains(.option),
-              let textView = self.view as? NSTextView else {
-            state = .failed
-            return
-        }
-        startPoint = textView.convert(event.locationInWindow, from: nil)
-        state = .began
-    }
-
-    override func mouseDragged(with event: NSEvent) {
-        guard state == .began || state == .changed,
-              let textView = self.view as? NSTextView else { return }
-        let currentPoint = textView.convert(event.locationInWindow, from: nil)
-
-        Task { @MainActor [weak self] in
-            self?.bridge?.applyColumnSelection(from: self?.startPoint ?? .zero, to: currentPoint)
-        }
-
-        state = .changed
-    }
-
-    override func mouseUp(with event: NSEvent) {
-        if state == .changed || state == .began {
-            state = .ended
-        } else {
-            state = .failed
-        }
-    }
-}
 #endif
