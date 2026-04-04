@@ -513,18 +513,20 @@ final class NSTextViewBridge: EditorFindDelegate {
 
     private func indentLines(in textView: NSTextView) {
         let nsString = textView.string as NSString
-        let lineRange = nsString.lineRange(for: textView.selectedRange())
+        let originalLineRange = nsString.lineRange(for: textView.selectedRange())
 
         textView.undoManager?.beginUndoGrouping()
 
         // Collect line starts
         var lineStarts: [Int] = []
-        var pos = lineRange.location
-        while pos < NSMaxRange(lineRange) {
+        var pos = originalLineRange.location
+        while pos < NSMaxRange(originalLineRange) {
             lineStarts.append(pos)
             let thisLineRange = nsString.lineRange(for: NSRange(location: pos, length: 0))
             pos = NSMaxRange(thisLineRange)
         }
+
+        let lineCount = lineStarts.count
 
         // Insert 4 spaces at each line start, reverse order
         for start in lineStarts.reversed() {
@@ -536,18 +538,39 @@ final class NSTextViewBridge: EditorFindDelegate {
 
         textView.didChangeText()
         textView.undoManager?.endUndoGrouping()
+
+        // Re-select the full affected line range so Tab can be pressed again
+        let newNSString = textView.string as NSString
+        let newLineRange = newNSString.lineRange(for: NSRange(location: originalLineRange.location, length: 0))
+        // Expand to cover all affected lines
+        var endPos = newLineRange.location
+        for _ in 0..<lineCount {
+            let lr = newNSString.lineRange(for: NSRange(location: endPos, length: 0))
+            endPos = NSMaxRange(lr)
+        }
+        textView.setSelectedRange(NSRange(location: newLineRange.location, length: endPos - newLineRange.location))
+
         syncContent()
     }
 
     private func outdentLines(in textView: NSTextView) {
         let nsString = textView.string as NSString
-        let lineRange = nsString.lineRange(for: textView.selectedRange())
+        let originalLineRange = nsString.lineRange(for: textView.selectedRange())
+
+        // Count lines before editing
+        var lineCount = 0
+        var countPos = originalLineRange.location
+        while countPos < NSMaxRange(originalLineRange) {
+            lineCount += 1
+            let lr = nsString.lineRange(for: NSRange(location: countPos, length: 0))
+            countPos = NSMaxRange(lr)
+        }
 
         textView.undoManager?.beginUndoGrouping()
 
-        var pos = NSMaxRange(lineRange)
-        while pos > lineRange.location {
-            let thisLineRange = nsString.lineRange(for: NSRange(location: max(pos - 1, lineRange.location), length: 0))
+        var pos = NSMaxRange(originalLineRange)
+        while pos > originalLineRange.location {
+            let thisLineRange = nsString.lineRange(for: NSRange(location: max(pos - 1, originalLineRange.location), length: 0))
             let lineText = nsString.substring(with: thisLineRange)
 
             var spacesToRemove = 0
@@ -575,6 +598,19 @@ final class NSTextViewBridge: EditorFindDelegate {
 
         textView.didChangeText()
         textView.undoManager?.endUndoGrouping()
+
+        // Re-select the full affected line range
+        let newNSString = textView.string as NSString
+        let startLoc = min(originalLineRange.location, newNSString.length)
+        let newFirstLineRange = newNSString.lineRange(for: NSRange(location: startLoc, length: 0))
+        var endPos = newFirstLineRange.location
+        for _ in 0..<lineCount {
+            guard endPos < newNSString.length else { break }
+            let lr = newNSString.lineRange(for: NSRange(location: endPos, length: 0))
+            endPos = NSMaxRange(lr)
+        }
+        textView.setSelectedRange(NSRange(location: newFirstLineRange.location, length: endPos - newFirstLineRange.location))
+
         syncContent()
     }
 
