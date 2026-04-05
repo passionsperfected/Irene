@@ -75,6 +75,20 @@ final class NSTextViewBridge: EditorFindDelegate {
         textView.smartInsertDeleteEnabled = false
     }
 
+    // MARK: - Line Numbers
+
+    private func installLineNumbers(on textView: NSTextView) {
+        guard let scrollView = textView.enclosingScrollView, let theme = themeAdapter else { return }
+        // Don't add if already present
+        if scrollView.verticalRulerView is LineNumberGutterView { return }
+
+        let gutterView = LineNumberGutterView(textView: textView)
+        gutterView.editorTheme = theme
+        scrollView.hasVerticalRuler = true
+        scrollView.verticalRulerView = gutterView
+        scrollView.rulersVisible = true
+    }
+
     // MARK: - EditorFindDelegate
 
     func highlightMatches(_ matches: [NSRange], currentIndex: Int) {

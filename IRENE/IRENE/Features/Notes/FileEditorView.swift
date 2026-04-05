@@ -52,16 +52,20 @@ struct FileEditorView: View {
                     MarkdownRendererView(markdown: viewModel.content)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    TextEditor(text: viewModel.contentBinding)
-                        .font(.system(size: fontSize, design: .monospaced))
-                        .foregroundStyle(theme.primaryText)
-                        .scrollContentBackground(.hidden)
-                        .focused($focusedField, equals: .editor)
-                        .disableAutocorrection(true)
-                        .textContentType(.none)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    HStack(spacing: 0) {
+                        LineNumbersView(content: viewModel.content, fontSize: fontSize)
+
+                        TextEditor(text: viewModel.contentBinding)
+                            .font(.system(size: fontSize, design: .monospaced))
+                            .foregroundStyle(theme.primaryText)
+                            .scrollContentBackground(.hidden)
+                            .focused($focusedField, equals: .editor)
+                            .disableAutocorrection(true)
+                            .textContentType(.none)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 8)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                         .onAppear {
                             #if os(macOS)
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {

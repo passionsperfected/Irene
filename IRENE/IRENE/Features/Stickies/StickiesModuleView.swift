@@ -6,9 +6,7 @@ struct StickiesModuleView: View {
     @State private var viewModel: StickiesViewModel
     @State private var editingSticky: StickyNote?
     @State private var showQuickCapture = false
-    @State private var isJiggleMode = false
     @State private var draggingSticky: StickyNote?
-    @State private var longPressingSticky: UUID?
 
     @Environment(\.ireneTheme) private var theme
 
@@ -54,24 +52,13 @@ struct StickiesModuleView: View {
                 }
             }
         }
-        // Tap background to exit jiggle mode
-        .onTapGesture {
-            if isJiggleMode {
-                withAnimation(.easeOut(duration: 0.2)) {
-                    isJiggleMode = false
-                }
-            }
+        .overlay {
+            Button { showQuickCapture = true } label: { Color.clear }
+                .keyboardShortcut("n", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .allowsHitTesting(false)
         }
-        // Escape to exit jiggle mode
-        #if os(macOS)
-        .onExitCommand {
-            if isJiggleMode {
-                withAnimation(.easeOut(duration: 0.2)) {
-                    isJiggleMode = false
-                }
-            }
-        }
-        #endif
     }
 
     // MARK: - Toolbar
@@ -82,31 +69,16 @@ struct StickiesModuleView: View {
                 .font(Typography.bodySemiBold(size: 14))
                 .foregroundStyle(theme.primaryText)
 
-            if isJiggleMode {
-                Button {
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        isJiggleMode = false
-                    }
-                } label: {
-                    Text("Done")
-                        .font(Typography.bodySemiBold(size: 12))
-                        .foregroundStyle(theme.accent)
-                }
-                .buttonStyle(.plain)
-            }
-
             Spacer()
 
-            if !isJiggleMode {
-                SearchBar(
-                    text: Binding(
-                        get: { viewModel.searchText },
-                        set: { viewModel.searchText = $0 }
-                    ),
-                    placeholder: "Search stickies..."
-                )
-                .frame(maxWidth: 220)
-            }
+            SearchBar(
+                text: Binding(
+                    get: { viewModel.searchText },
+                    set: { viewModel.searchText = $0 }
+                ),
+                placeholder: "Search stickies..."
+            )
+            .frame(maxWidth: 220)
 
             Button {
                 showQuickCapture = true
@@ -129,30 +101,14 @@ struct StickiesModuleView: View {
                 ForEach(viewModel.filteredStickies) { sticky in
                     StickyNoteCard(
                         sticky: sticky,
-                        isJiggling: isJiggleMode,
+                        isJiggling: false,
                         onTap: {
-                            if isJiggleMode {
-                                // In jiggle mode, tap does nothing (drag to reorder)
-                            } else {
-                                editingSticky = sticky
-                            }
+                            editingSticky = sticky
                         },
                         onDelete: {
                             Task { await viewModel.deleteSticky(sticky) }
                         }
                     )
-                    .onLongPressGesture(minimumDuration: 0.4, pressing: { pressing in
-                        // Immediate scale feedback while pressing
-                        withAnimation(.easeInOut(duration: 0.15)) {
-                            longPressingSticky = pressing ? sticky.id : nil
-                        }
-                    }, perform: {
-                        longPressingSticky = nil
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isJiggleMode = true
-                        }
-                    })
-                    .scaleEffect(longPressingSticky == sticky.id ? 0.93 : 1.0)
                     .opacity(draggingSticky?.id == sticky.id ? 0.4 : 1.0)
                     .onDrag {
                         draggingSticky = sticky

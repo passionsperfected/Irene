@@ -14,7 +14,13 @@ struct StickyQuickCaptureView: View {
                 Text("Quick Sticky")
                     .font(Typography.bodySemiBold(size: 14))
                     .foregroundStyle(theme.primaryText)
+
                 Spacer()
+
+                Text("Enter to save, Shift+Enter for new line")
+                    .font(Typography.caption(size: 9))
+                    .foregroundStyle(theme.secondaryText.opacity(0.4))
+
                 Button {
                     dismiss()
                 } label: {
@@ -34,14 +40,13 @@ struct StickyQuickCaptureView: View {
                 .background(theme.secondaryBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .focused($isFocused)
+                #if os(macOS)
+                .onEnterSubmit { save() }
+                #endif
 
             HStack {
                 Spacer()
-                Button {
-                    guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                    onSave(content)
-                    dismiss()
-                } label: {
+                Button(action: save) {
                     Text("Save")
                         .font(Typography.button(size: 12))
                         .textCase(.uppercase)
@@ -62,5 +67,11 @@ struct StickyQuickCaptureView: View {
         .onAppear {
             isFocused = true
         }
+    }
+
+    private func save() {
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        onSave(content)
+        dismiss()
     }
 }

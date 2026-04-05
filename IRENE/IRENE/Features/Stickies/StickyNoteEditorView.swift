@@ -15,7 +15,13 @@ struct StickyNoteEditorView: View {
                 Text("Edit Sticky")
                     .font(Typography.bodySemiBold(size: 14))
                     .foregroundStyle(theme.primaryText)
+
                 Spacer()
+
+                Text("Enter to save, Shift+Enter for new line")
+                    .font(Typography.caption(size: 9))
+                    .foregroundStyle(theme.secondaryText.opacity(0.4))
+
                 Button("Done") {
                     onSave(sticky)
                     dismiss()
@@ -38,6 +44,12 @@ struct StickyNoteEditorView: View {
                     .padding(8)
                     .background(theme.secondaryBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                    #if os(macOS)
+                    .onEnterSubmit {
+                        onSave(sticky)
+                        dismiss()
+                    }
+                    #endif
 
                 // Color picker
                 VStack(alignment: .leading, spacing: 8) {

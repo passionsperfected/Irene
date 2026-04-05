@@ -36,6 +36,7 @@
 		160DEB4224ECDF09DA2C42B1 /* VaultConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9827D8B644BCA5E0769D9374 /* VaultConfiguration.swift */; };
 		161F0B74BCA578249D67D5DA /* ToDoQuickCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272AC4862FAD9A679E726A3 /* ToDoQuickCaptureView.swift */; };
 		16A2BB6F66A5CC1F58D78E6D /* FindReplaceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13363C7F0F1059744A87648A /* FindReplaceBar.swift */; };
+		18ED7C294033303B33793107 /* LineNumbersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CAEB55ABCD575B5191A52A /* LineNumbersView.swift */; };
 		1900AA8953CEF6632ED7456B /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61BA85F7771C15E5DEE178CE /* ChatView.swift */; };
 		19BADC09CA12029E0D6BED26 /* MockProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B195DFA7A4EDF6CCB0AF709 /* MockProvider.swift */; };
 		19D0B06952EDD73D4E3A396E /* CalendarModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200D04DAB6274131AB6DE57 /* CalendarModuleView.swift */; };
@@ -113,8 +114,10 @@
 		694D55F53137F623D45766CB /* MultiCursorStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495299869C07A32CB875F924 /* MultiCursorStateTests.swift */; };
 		69A83C6119876A461A6DDC8F /* VaultManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44436D39C073C250C586455 /* VaultManagerTests.swift */; };
 		6A4E9221CE66262619FBFC13 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 70873173E52A2EF885735731 /* Markdown */; };
+		6B6FBBE6DE7BB4A8E3BB62BA /* EnterToSubmit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB01DE945189D049676E6D5 /* EnterToSubmit.swift */; };
 		6C510F37096B4E5F1751EF38 /* ChatConversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D4F896F63E98ED89771E8D /* ChatConversation.swift */; };
 		6D2E251C04E602F86270CB69 /* ToDoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8622A32FC30DA368186BDED /* ToDoItem.swift */; };
+		6DD0CCD2C89E441D07308354 /* EnterToSubmit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB01DE945189D049676E6D5 /* EnterToSubmit.swift */; };
 		6F899AFA4C5458253073C38C /* ThemeEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE5478FD0ACA3A407E707239 /* ThemeEnvironment.swift */; };
 		7064C4F1E2F443F461546594 /* LLMProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9303B69A755E860BCE81180B /* LLMProvider.swift */; };
 		70C039C15D62EF47E14F9193 /* DashboardSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6328216CD176CBA03F1B563A /* DashboardSummaryCard.swift */; };
@@ -192,6 +195,7 @@
 		B5D0E3092B8CE0F819917842 /* FileTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C3350AC198AC68710F888B8 /* FileTreeView.swift */; };
 		B5E0F6F7288F03E015F46315 /* NoteAIAssistantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7120C3DBD56B0F12F04A4069 /* NoteAIAssistantView.swift */; };
 		B628AB073E123056C4DC9A3C /* ToDoModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE8BCE1AFF50E6D266713A6 /* ToDoModuleView.swift */; };
+		B6AF1ABAE375369E036BC207 /* LineNumbersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CAEB55ABCD575B5191A52A /* LineNumbersView.swift */; };
 		B78CB0567B60066DCC5BE0FE /* ThemeDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8971CD81FB615C015ABDCF44 /* ThemeDefinition.swift */; };
 		BA786EA757F1DB0942D8BBFE /* FindReplaceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13363C7F0F1059744A87648A /* FindReplaceBar.swift */; };
 		BBF9E83C2AF596EA7F6355D7 /* ThemeToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5A2CFCD516EBC8FA2BDDD7 /* ThemeToken.swift */; };
@@ -351,6 +355,7 @@
 		89BE985AF35FD52D1CE6F892 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8A264910C2EB91E8C558B3B1 /* ChatModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatModuleView.swift; sourceTree = "<group>"; };
 		8AB2C72EA3239974D5E8D969 /* MarkdownStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownStorage.swift; sourceTree = "<group>"; };
+		8DB01DE945189D049676E6D5 /* EnterToSubmit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnterToSubmit.swift; sourceTree = "<group>"; };
 		8F131F695626FCB28D01D6E1 /* monokai.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = monokai.json; sourceTree = "<group>"; };
 		9303B69A755E860BCE81180B /* LLMProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMProvider.swift; sourceTree = "<group>"; };
 		936AA30AA692D5565ED1F500 /* ItemMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemMetadata.swift; sourceTree = "<group>"; };
@@ -366,6 +371,7 @@
 		A5A02B3A944F93282C68E88A /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
 		A6DD9CA2BA6FE8471062E6A9 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
 		A73AF5081ED8D581025220C0 /* RecordingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingSession.swift; sourceTree = "<group>"; };
+		A9CAEB55ABCD575B5191A52A /* LineNumbersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineNumbersView.swift; sourceTree = "<group>"; };
 		B1B12563FBED40346CEEE7A8 /* StickiesModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickiesModuleView.swift; sourceTree = "<group>"; };
 		B4185F3A1B1CAC37CCD80AF3 /* MailBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailBridge.swift; sourceTree = "<group>"; };
 		B44436D39C073C250C586455 /* VaultManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultManagerTests.swift; sourceTree = "<group>"; };
@@ -609,6 +615,7 @@
 		7D093FE0AB5156A53FF05069 /* Modifiers */ = {
 			isa = PBXGroup;
 			children = (
+				8DB01DE945189D049676E6D5 /* EnterToSubmit.swift */,
 			);
 			path = Modifiers;
 			sourceTree = "<group>";
@@ -821,6 +828,7 @@
 			children = (
 				1887612F74694BD0D783F598 /* EditorThemeAdapter.swift */,
 				596CB21CED12C3AB3CE05CDA /* LineNumberGutterView.swift */,
+				A9CAEB55ABCD575B5191A52A /* LineNumbersView.swift */,
 				E93DAE4B5DC10F3612356186 /* MultiCursorController.swift */,
 				14C8B33A039D0C228DC9B259 /* MultiCursorState.swift */,
 				D12C6288FCEF68C54A581D52 /* NSTextViewBridge.swift */,
@@ -1032,6 +1040,7 @@
 				D8C84D5CD9B3105872AFF6D9 /* DashboardViewModel.swift in Sources */,
 				DA4AD491C8CDCC5E9C628B23 /* EditorThemeAdapter.swift in Sources */,
 				142CA81EE7BE7BB1193317D0 /* EmptyStateView.swift in Sources */,
+				6B6FBBE6DE7BB4A8E3BB62BA /* EnterToSubmit.swift in Sources */,
 				9156497DA7C7EFA1FCA0828A /* EventDetailView.swift in Sources */,
 				F14386A8821ACAE38D8677BA /* FileCoordinator.swift in Sources */,
 				678D79CB06D56A4D84E78284 /* FileEditorView.swift in Sources */,
@@ -1056,6 +1065,7 @@
 				AC6BA27EA3052612F7A4E3C9 /* LLMResponseChunk.swift in Sources */,
 				E466BC8B6E97C39E039C387F /* LLMService.swift in Sources */,
 				DE306FEFF95CD9DC6AD95FEC /* LineNumberGutterView.swift in Sources */,
+				B6AF1ABAE375369E036BC207 /* LineNumbersView.swift in Sources */,
 				C06A75B4788E1EFC41180B8F /* MailBridge.swift in Sources */,
 				266ECB91AFF622336FB676A2 /* MailComposeView.swift in Sources */,
 				26D7AAABFE87F82122046831 /* MailMessage.swift in Sources */,
@@ -1154,6 +1164,7 @@
 				B1C5506C9ADE25FCC1BB8540 /* DashboardViewModel.swift in Sources */,
 				1C3B93FE31D34DBD34FA42B9 /* EditorThemeAdapter.swift in Sources */,
 				A310A8B097576B714E559E43 /* EmptyStateView.swift in Sources */,
+				6DD0CCD2C89E441D07308354 /* EnterToSubmit.swift in Sources */,
 				5D0A5FCEB55EE61552B8348F /* EventDetailView.swift in Sources */,
 				897133412EABBF3328EF5F8F /* FileCoordinator.swift in Sources */,
 				FFB3BB190957AEBF84682206 /* FileEditorView.swift in Sources */,
@@ -1178,6 +1189,7 @@
 				14EF1A6B3E6B9581F47A5621 /* LLMResponseChunk.swift in Sources */,
 				4B57C9192CC73E88E6433514 /* LLMService.swift in Sources */,
 				05E9B27DA188D3141302C2AB /* LineNumberGutterView.swift in Sources */,
+				18ED7C294033303B33793107 /* LineNumbersView.swift in Sources */,
 				B27BAB81B81071D6D60129BB /* MailBridge.swift in Sources */,
 				463064CC51253D810200E022 /* MailComposeView.swift in Sources */,
 				C606C55FFD7D2359909D658F /* MailMessage.swift in Sources */,
