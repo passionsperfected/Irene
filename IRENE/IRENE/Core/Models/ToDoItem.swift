@@ -43,6 +43,7 @@ struct ToDoItem: Codable, Identifiable, Sendable, Hashable {
     var completed: Date?
     var tags: [String]
     var inbox: Bool
+    var sortOrder: Int
 
     init(
         id: UUID = UUID(),
@@ -55,7 +56,8 @@ struct ToDoItem: Codable, Identifiable, Sendable, Hashable {
         modified: Date = Date(),
         completed: Date? = nil,
         tags: [String] = [],
-        inbox: Bool = true
+        inbox: Bool = true,
+        sortOrder: Int = 0
     ) {
         self.id = id
         self.title = title
@@ -68,6 +70,7 @@ struct ToDoItem: Codable, Identifiable, Sendable, Hashable {
         self.completed = completed
         self.tags = tags
         self.inbox = inbox
+        self.sortOrder = sortOrder
     }
 
     var fileName: String { "\(id).json" }

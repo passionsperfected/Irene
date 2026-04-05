@@ -1,4 +1,7 @@
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 struct SettingsView: View {
     @Environment(\.ireneTheme) private var theme
@@ -12,8 +15,11 @@ struct SettingsView: View {
     @State private var grokKey: String = ""
     @State private var selectedProvider: LLMProviderType = .anthropic
     @State private var selectedPersonality: String = "professional"
+    @State private var selectedCompletionSound: String = "Hero"
     @State private var hasUnsavedChanges: Bool = false
     @State private var saveConfirmation: Bool = false
+
+    private let completionSounds = ["Hero", "Pop", "Tink", "Ping", "Morse", "Bottle", "Purr"]
 
     var body: some View {
         ScrollView {
@@ -24,6 +30,7 @@ struct SettingsView: View {
                 providerSection
                 apiKeysSection
                 personalitySection
+                soundSection
             }
             .padding(24)
         }
@@ -322,6 +329,79 @@ struct SettingsView: View {
 
     // MARK: - Helpers
 
+    // MARK: - Completion Sound
+
+    private var soundSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionLabel("COMPLETION SOUND")
+
+            Text("Sound played when you complete a to-do")
+                .font(Typography.body(size: 12))
+                .foregroundStyle(theme.secondaryText.opacity(0.6))
+
+            HStack(spacing: 8) {
+                ForEach(completionSounds, id: \.self) { sound in
+                    Button {
+                        selectedCompletionSound = sound
+                        markChanged()
+                        // Preview the sound
+                        #if os(macOS)
+                        NSSound(named: NSSound.Name(sound))?.play()
+                        #endif
+                    } label: {
+                        VStack(spacing: 4) {
+                            Image(systemName: soundIcon(for: sound))
+                                .font(.system(size: 16))
+                                .foregroundStyle(
+                                    selectedCompletionSound == sound
+                                        ? theme.accent
+                                        : theme.secondaryText
+                                )
+                                .frame(width: 36, height: 36)
+                                .background(
+                                    selectedCompletionSound == sound
+                                        ? theme.accent.opacity(0.15)
+                                        : theme.secondaryBackground
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .strokeBorder(
+                                            selectedCompletionSound == sound
+                                                ? theme.accent.opacity(0.4)
+                                                : theme.border.opacity(0.2),
+                                            lineWidth: 1
+                                        )
+                                )
+
+                            Text(sound)
+                                .font(Typography.caption(size: 9))
+                                .foregroundStyle(
+                                    selectedCompletionSound == sound
+                                        ? theme.primaryText
+                                        : theme.secondaryText.opacity(0.6)
+                                )
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private func soundIcon(for sound: String) -> String {
+        switch sound {
+        case "Hero": return "star.fill"
+        case "Pop": return "bubble.fill"
+        case "Tink": return "bell.fill"
+        case "Ping": return "waveform"
+        case "Morse": return "dot.radiowaves.left.and.right"
+        case "Bottle": return "waterbottle.fill"
+        case "Purr": return "cat.fill"
+        default: return "speaker.wave.2.fill"
+        }
+    }
+
     private func sectionLabel(_ text: String) -> some View {
         Text(text)
             .font(Typography.label())
@@ -337,6 +417,7 @@ struct SettingsView: View {
         grokKey = config.apiKeys["grok"] ?? ""
         selectedProvider = LLMProviderType(rawValue: config.selectedProvider) ?? .anthropic
         selectedPersonality = config.selectedPersonality
+        selectedCompletionSound = config.completionSound
     }
 
     private func markChanged() {
@@ -353,6 +434,7 @@ struct SettingsView: View {
                 config.selectedProvider = selectedProvider.rawValue
                 config.selectedTheme = themeManager.current.id
                 config.selectedPersonality = selectedPersonality
+                config.completionSound = selectedCompletionSound
             }
 
             // Update LLM service with new keys

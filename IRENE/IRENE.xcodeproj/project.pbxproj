@@ -57,6 +57,7 @@
 		278E317821109705AE2F912C /* ToDoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77FF4C3FAC3D6C4045A511F /* ToDoDetailView.swift */; };
 		28B6745B4EF8C01F9EA2748D /* VaultPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E559AC97E3B45B56123578 /* VaultPickerView.swift */; };
 		2A7641E2BC5695622DA04B28 /* MarkdownStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB2C72EA3239974D5E8D969 /* MarkdownStorage.swift */; };
+		2B08BBACD0916AA6D4797056 /* TagColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69DC27E48C5DEF449137260 /* TagColor.swift */; };
 		2C06AF25921BE33B59A021FB /* DashboardSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6328216CD176CBA03F1B563A /* DashboardSummaryCard.swift */; };
 		2C5BAC4313C1BB947318BC4C /* IRENEError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86D84405F64FC4F8BBDB61A /* IRENEError.swift */; };
 		2C84477A2644E51ABDF38C30 /* RecordingControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81155C226F5CB61A83889F8A /* RecordingControlsView.swift */; };
@@ -197,6 +198,7 @@
 		B628AB073E123056C4DC9A3C /* ToDoModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE8BCE1AFF50E6D266713A6 /* ToDoModuleView.swift */; };
 		B6AF1ABAE375369E036BC207 /* LineNumbersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CAEB55ABCD575B5191A52A /* LineNumbersView.swift */; };
 		B78CB0567B60066DCC5BE0FE /* ThemeDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8971CD81FB615C015ABDCF44 /* ThemeDefinition.swift */; };
+		B8548BF8AB9788327E994934 /* TagColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69DC27E48C5DEF449137260 /* TagColor.swift */; };
 		BA786EA757F1DB0942D8BBFE /* FindReplaceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13363C7F0F1059744A87648A /* FindReplaceBar.swift */; };
 		BBF9E83C2AF596EA7F6355D7 /* ThemeToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5A2CFCD516EBC8FA2BDDD7 /* ThemeToken.swift */; };
 		BC00D415E8394AEB38A2C97C /* FileTreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CD5D3A31F207F13E27255A /* FileTreeNode.swift */; };
@@ -403,6 +405,7 @@
 		EF1BF45E4CC4FE04BA4D00F9 /* IRENEApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRENEApp.swift; sourceTree = "<group>"; };
 		F39B500A57B49EF4F74E5117 /* FileEditorViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileEditorViewModelTests.swift; sourceTree = "<group>"; };
 		F5143FA2243D76348C155CA6 /* TagEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagEditor.swift; sourceTree = "<group>"; };
+		F69DC27E48C5DEF449137260 /* TagColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagColor.swift; sourceTree = "<group>"; };
 		F7223F2901339BAB6D5E3B5A /* ConversationListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListViewModel.swift; sourceTree = "<group>"; };
 		F77FF4C3FAC3D6C4045A511F /* ToDoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoDetailView.swift; sourceTree = "<group>"; };
 		FC967C54B9CEA2B408EF642C /* GlobalSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSearchView.swift; sourceTree = "<group>"; };
@@ -592,6 +595,7 @@
 				6BEE62202B2D02E44F99047E /* IRENESidebar.swift */,
 				046FFFC5808D996AEA6648F5 /* MiniCalendarView.swift */,
 				EC30CDDA3C54BEC9068A21DF /* SearchBar.swift */,
+				F69DC27E48C5DEF449137260 /* TagColor.swift */,
 				F5143FA2243D76348C155CA6 /* TagEditor.swift */,
 			);
 			path = Components;
@@ -1105,6 +1109,7 @@
 				5EF68AC5D03B048DB4F21CF0 /* SublimeEditorRepresentable.swift in Sources */,
 				897FF3C816B4CED6EF33D43A /* SublimeTextView.swift in Sources */,
 				C720A1F63DF34F7ABB0971B0 /* SystemPrompt.swift in Sources */,
+				2B08BBACD0916AA6D4797056 /* TagColor.swift in Sources */,
 				7D092ABC5011F93F148D4012 /* TagEditor.swift in Sources */,
 				FBAB61626613D7581B585230 /* ThemeDefinition.swift in Sources */,
 				6F899AFA4C5458253073C38C /* ThemeEnvironment.swift in Sources */,
@@ -1229,6 +1234,7 @@
 				89CC25A9119AF9B08054A46E /* SublimeEditorRepresentable.swift in Sources */,
 				08A4573F3E9608BB560E19F3 /* SublimeTextView.swift in Sources */,
 				74F402B17BD17069AE0E5CAE /* SystemPrompt.swift in Sources */,
+				B8548BF8AB9788327E994934 /* TagColor.swift in Sources */,
 				E70A260DE4DF30FEB3EAD162 /* TagEditor.swift in Sources */,
 				B78CB0567B60066DCC5BE0FE /* ThemeDefinition.swift in Sources */,
 				3CD011EAF4C5332C6842DBE4 /* ThemeEnvironment.swift in Sources */,

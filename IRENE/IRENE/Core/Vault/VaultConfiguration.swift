@@ -5,6 +5,7 @@ struct VaultConfiguration: Codable, Sendable {
     var selectedProvider: String = "anthropic"
     var selectedTheme: String = "deep-ocean"
     var selectedPersonality: String = "professional"
+    var completionSound: String = "Hero"
     var apiKeys: [String: String] = [:]
 
     static let fileName = "config.json"

@@ -7,6 +7,13 @@ struct ToDoItemRow: View {
 
     @Environment(\.ireneTheme) private var theme
 
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .short
+        f.timeStyle = .short
+        return f
+    }()
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 10) {
@@ -32,6 +39,42 @@ struct ToDoItemRow: View {
                             .foregroundStyle(theme.secondaryText.opacity(0.6))
                             .lineLimit(1)
                     }
+
+                    // Tags + dates row
+                    HStack(spacing: 6) {
+                        // Tags
+                        if !item.tags.isEmpty {
+                            ForEach(item.tags.prefix(4), id: \.self) { tag in
+                                Text(tag)
+                                    .font(Typography.caption(size: 8))
+                                    .foregroundStyle(TagColor.color(for: tag))
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 1)
+                                    .background(TagColor.color(for: tag).opacity(0.12))
+                                    .clipShape(Capsule())
+                            }
+                        }
+
+                        Spacer()
+
+                        HStack(spacing: 3) {
+                            Image(systemName: "calendar.badge.plus")
+                                .font(.system(size: 8))
+                            Text(Self.dateFormatter.string(from: item.created))
+                        }
+                        .font(Typography.caption(size: 8))
+                        .foregroundStyle(theme.secondaryText.opacity(0.35))
+
+                        if let dueDate = item.dueDate {
+                            HStack(spacing: 3) {
+                                Image(systemName: "clock")
+                                    .font(.system(size: 8))
+                                Text(Self.dateFormatter.string(from: dueDate))
+                            }
+                            .font(Typography.caption(size: 8))
+                            .foregroundStyle(item.isOverdue ? .red.opacity(0.8) : theme.secondaryText.opacity(0.5))
+                        }
+                    }
                 }
 
                 Spacer()
@@ -39,12 +82,13 @@ struct ToDoItemRow: View {
                 // Priority badge
                 priorityBadge
 
-                // Due date
+                // Due date badge (compact)
                 if let dueDate = item.dueDate {
                     dueDateBadge(dueDate)
                 }
             }
             .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
