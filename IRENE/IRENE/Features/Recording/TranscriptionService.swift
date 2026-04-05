@@ -51,10 +51,9 @@ final class TranscriptionService {
 
         let request = SFSpeechURLRecognitionRequest(url: audioURL)
         request.shouldReportPartialResults = false
-
-        if #available(macOS 15.0, iOS 18.0, *) {
-            request.requiresOnDeviceRecognition = recognizer.supportsOnDeviceRecognition
-        }
+        request.addsPunctuation = true
+        // Use server-based recognition for better accuracy with mixed audio
+        // Don't force on-device which has lower quality
 
         print("[IRENE Transcribe] Starting recognition...")
 

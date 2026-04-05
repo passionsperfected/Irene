@@ -19,7 +19,10 @@
       "Bash(xcodebuild test:*)",
       "Bash(xcodebuild build-for-testing:*)",
       "Bash(xcodebuild build:*)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(sw_vers -productVersion)",
+      "Bash(afinfo \"/Users/jdaigle/Desktop/test_vault/recording/audio/52A6770C-42A7-4839-A69E-2A8C32F7E9FA.m4a\")",
+      "Bash(ls -la /Users/jdaigle/Desktop/test_vault/recording/audio/*.m4a)"
     ]
   }
 }

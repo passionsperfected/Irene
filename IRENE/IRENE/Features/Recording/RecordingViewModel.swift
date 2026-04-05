@@ -58,6 +58,25 @@ final class RecordingViewModel {
         session.duration = result.duration
         session.status = .complete
 
+        // For virtual meetings, save reference to the mic-only temp file for transcription
+        if session.audioSource == .systemAndMic, let micURL = captureService.micTempURL {
+            let micFileName = "\(session.id)_mic.m4a"
+            if let audioDir = try? vaultManager.url(for: "recording/audio") {
+                let destURL = audioDir.appendingPathComponent(micFileName)
+                let exists = FileManager.default.fileExists(atPath: micURL.path)
+                let size = (try? FileManager.default.attributesOfItem(atPath: micURL.path)[.size] as? Int) ?? 0
+                print("[IRENE Recording] Mic temp file exists: \(exists), size: \(size), path: \(micURL.path)")
+
+                do {
+                    try FileManager.default.copyItem(at: micURL, to: destURL)
+                    session.micOnlyFileName = micFileName
+                    print("[IRENE Recording] Copied mic file to: \(destURL.lastPathComponent)")
+                } catch {
+                    print("[IRENE Recording] Failed to copy mic file: \(error)")
+                }
+            }
+        }
+
         activeSession = nil
 
         if let index = sessions.firstIndex(where: { $0.id == session.id }) {
@@ -83,7 +102,10 @@ final class RecordingViewModel {
             errorMessage = "Cannot find audio directory"
             return
         }
+
+        // Always transcribe the main merged audio file (has both mic + system audio)
         let audioURL = audioDir.appendingPathComponent(audioFileName)
+        print("[IRENE Recording] Transcribing main audio: \(audioFileName)")
 
         // Check file exists and has content
         let fileExists = FileManager.default.fileExists(atPath: audioURL.path)

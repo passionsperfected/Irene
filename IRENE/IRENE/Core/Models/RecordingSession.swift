@@ -9,9 +9,8 @@ enum RecordingStatus: String, Codable, Sendable {
 }
 
 enum AudioSource: String, Codable, CaseIterable, Sendable {
-    case systemAndMic = "System + Mic"
-    case micOnly = "Mic Only"
-    case systemOnly = "System Only"
+    case systemAndMic = "Virtual Meeting"
+    case micOnly = "In-Person Meeting"
 }
 
 struct RecordingSession: Codable, Identifiable, Sendable, Hashable {
@@ -21,6 +20,7 @@ struct RecordingSession: Codable, Identifiable, Sendable, Hashable {
     var endTime: Date?
     var duration: TimeInterval?
     var audioFileName: String?
+    var micOnlyFileName: String?  // Separate mic-only file for better transcription
     var transcriptionFileName: String?
     var summaryFileName: String?
     var status: RecordingStatus

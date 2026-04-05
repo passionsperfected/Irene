@@ -4,64 +4,99 @@ struct RecordingControlsView: View {
     @Bindable var viewModel: RecordingViewModel
     @Environment(\.ireneTheme) private var theme
     @State private var title: String = "Meeting Recording"
+    @State private var selectedSource: AudioSource = .systemAndMic
 
     var body: some View {
-        HStack(spacing: 14) {
-            // Record/Stop button
-            Button {
-                Task {
-                    if viewModel.captureService.isRecording {
-                        await viewModel.stopRecording()
-                    } else {
-                        await viewModel.startRecording(source: .micOnly, title: title)
+        VStack(spacing: 8) {
+            HStack(spacing: 14) {
+                // Record/Stop button
+                Button {
+                    Task {
+                        if viewModel.captureService.isRecording {
+                            await viewModel.stopRecording()
+                        } else {
+                            await viewModel.startRecording(source: selectedSource, title: title)
+                        }
                     }
-                }
-            } label: {
-                ZStack {
-                    Circle()
-                        .fill(viewModel.captureService.isRecording ? .red : theme.accent)
-                        .frame(width: 36, height: 36)
-
-                    if viewModel.captureService.isRecording {
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(Color.white)
-                            .frame(width: 14, height: 14)
-                    } else {
+                } label: {
+                    ZStack {
                         Circle()
-                            .fill(Color.white)
-                            .frame(width: 14, height: 14)
+                            .fill(viewModel.captureService.isRecording ? .red : theme.accent)
+                            .frame(width: 36, height: 36)
+
+                        if viewModel.captureService.isRecording {
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Color.white)
+                                .frame(width: 14, height: 14)
+                        } else {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 14, height: 14)
+                        }
                     }
                 }
+                .buttonStyle(.plain)
+
+                if viewModel.captureService.isRecording {
+                    Text(formatTime(viewModel.captureService.elapsedTime))
+                        .font(.system(size: 16, weight: .light, design: .monospaced))
+                        .foregroundStyle(theme.primaryText)
+
+                    AudioLevelView(level: viewModel.captureService.audioLevel)
+                        .frame(width: 100, height: 16)
+
+                    Spacer()
+
+                    HStack(spacing: 4) {
+                        Circle().fill(.red).frame(width: 6, height: 6)
+                        Text("Recording")
+                            .font(Typography.caption(size: 10))
+                            .foregroundStyle(.red.opacity(0.8))
+                    }
+                } else {
+                    TextField("Recording title", text: $title)
+                        .font(Typography.body(size: 13))
+                        .textFieldStyle(.plain)
+                        .foregroundStyle(theme.primaryText)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(theme.secondaryBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                    Spacer()
+                }
             }
-            .buttonStyle(.plain)
 
-            if viewModel.captureService.isRecording {
-                // Timer
-                Text(formatTime(viewModel.captureService.elapsedTime))
-                    .font(.system(size: 16, weight: .light, design: .monospaced))
-                    .foregroundStyle(theme.primaryText)
+            // Source picker — only when not recording
+            if !viewModel.captureService.isRecording {
+                HStack(spacing: 6) {
+                    ForEach(AudioSource.allCases, id: \.self) { source in
+                        Button {
+                            selectedSource = source
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: sourceIcon(source))
+                                    .font(.system(size: 9))
+                                Text(source.rawValue)
+                                    .font(Typography.caption(size: 9))
+                            }
+                            .foregroundStyle(selectedSource == source ? theme.accent : theme.secondaryText.opacity(0.6))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(selectedSource == source ? theme.accent.opacity(0.15) : Color.clear)
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule().strokeBorder(
+                                    selectedSource == source ? theme.accent.opacity(0.3) : theme.border.opacity(0.2),
+                                    lineWidth: 1
+                                )
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
 
-                // Audio level meter
-                AudioLevelView(level: viewModel.captureService.audioLevel)
-                    .frame(width: 100, height: 16)
-            } else {
-                // Title field
-                TextField("Recording title", text: $title)
-                    .font(Typography.body(size: 13))
-                    .textFieldStyle(.plain)
-                    .foregroundStyle(theme.primaryText)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(theme.secondaryBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
-            }
-
-            Spacer()
-
-            if viewModel.captureService.isRecording {
-                Text("Recording...")
-                    .font(Typography.caption(size: 10))
-                    .foregroundStyle(.red.opacity(0.8))
+                    Spacer()
+                }
             }
         }
         .padding(.horizontal, 14)
@@ -75,6 +110,13 @@ struct RecordingControlsView: View {
                     lineWidth: 1
                 )
         )
+    }
+
+    private func sourceIcon(_ source: AudioSource) -> String {
+        switch source {
+        case .systemAndMic: return "headphones"
+        case .micOnly: return "mic"
+        }
     }
 
     private func formatTime(_ interval: TimeInterval) -> String {
