@@ -1,4 +1,5 @@
 import Foundation
+import Speech
 
 @MainActor @Observable
 final class RecordingViewModel {
@@ -66,18 +67,36 @@ final class RecordingViewModel {
     }
 
     func transcribeSession(_ session: RecordingSession) async {
-        guard let audioFileName = session.audioFileName else { return }
-
-        let authorized = await transcriptionService.requestPermission()
-        guard authorized else {
-            errorMessage = "Speech recognition permission denied"
+        guard let audioFileName = session.audioFileName else {
+            errorMessage = "No audio file name"
             return
         }
 
-        guard let audioDir = try? vaultManager.url(for: "recording/audio") else { return }
+        // Ensure speech recognition permission
+        await transcriptionService.requestAuthorizationIfNeeded()
+        guard transcriptionService.isAuthorized else {
+            errorMessage = "Speech recognition permission denied. Enable it in System Settings > Privacy & Security > Speech Recognition."
+            return
+        }
+
+        guard let audioDir = try? vaultManager.url(for: "recording/audio") else {
+            errorMessage = "Cannot find audio directory"
+            return
+        }
         let audioURL = audioDir.appendingPathComponent(audioFileName)
 
-        // Update status
+        // Check file exists and has content
+        let fileExists = FileManager.default.fileExists(atPath: audioURL.path)
+        let fileSize = (try? FileManager.default.attributesOfItem(atPath: audioURL.path)[.size] as? Int) ?? 0
+        print("[IRENE Recording] Transcribing: \(audioURL.path)")
+        print("[IRENE Recording] File exists: \(fileExists), size: \(fileSize) bytes")
+
+        guard fileExists && fileSize > 0 else {
+            errorMessage = "Audio file is missing or empty. The recording may have failed — check microphone permissions in System Settings."
+            updateSessionStatus(session.id, status: .failed)
+            return
+        }
+
         updateSessionStatus(session.id, status: .transcribing)
 
         do {
@@ -107,7 +126,21 @@ final class RecordingViewModel {
     }
 
     func summarizeSession(_ session: RecordingSession) async {
-        guard let llmService, let transcriptionFileName = session.transcriptionFileName else { return }
+        guard let llmService else {
+            errorMessage = "LLM service not configured. Add an API key in Settings."
+            print("[IRENE Recording] Summarize failed: llmService is nil")
+            return
+        }
+        guard let transcriptionFileName = session.transcriptionFileName else {
+            errorMessage = "No transcription found. Transcribe the recording first."
+            print("[IRENE Recording] Summarize failed: no transcription file")
+            return
+        }
+        guard llmService.isConfigured else {
+            errorMessage = "LLM not configured. Add an API key in Settings."
+            print("[IRENE Recording] Summarize failed: LLM not configured")
+            return
+        }
 
         do {
             let transcriptionDir = try vaultManager.url(for: "recording/transcription")

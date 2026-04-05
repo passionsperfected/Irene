@@ -45,6 +45,13 @@ struct RemindersModuleView: View {
                 Task { _ = await viewModel.createReminder(title: title, date: date) }
             }
         }
+        .overlay {
+            Button { showQuickCapture = true } label: { Color.clear }
+                .keyboardShortcut("n", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .allowsHitTesting(false)
+        }
     }
 
     private var toolbar: some View {

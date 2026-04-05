@@ -6,20 +6,15 @@ import ScreenCaptureKit
 #endif
 
 @MainActor @Observable
-final class AudioCaptureService {
+final class AudioCaptureService: NSObject, @unchecked Sendable {
     private(set) var isRecording = false
     private(set) var audioLevel: Float = 0
     private(set) var elapsedTime: TimeInterval = 0
 
-    private var audioEngine: AVAudioEngine?
-    private var audioFile: AVAudioFile?
+    private var audioRecorder: AVAudioRecorder?
     private var timer: Timer?
     private var startTime: Date?
-
-    #if os(macOS)
-    private var scStream: SCStream?
-    private var systemAudioFile: AVAudioFile?
-    #endif
+    private var levelTimer: Timer?
 
     var canCaptureSystemAudio: Bool {
         #if os(macOS)
@@ -30,111 +25,57 @@ final class AudioCaptureService {
     }
 
     func startRecording(to url: URL, source: AudioSource) async throws {
-        #if os(iOS)
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.record, mode: .default)
-        try session.setActive(true)
-        #endif
-
-        switch source {
-        case .micOnly:
-            try startMicCapture(to: url)
-        case .systemAndMic, .systemOnly:
-            #if os(macOS)
-            try await startSystemAndMicCapture(to: url, micEnabled: source == .systemAndMic)
-            #else
-            try startMicCapture(to: url)
-            #endif
+        // Request microphone permission
+        let granted = await AVCaptureDevice.requestAccess(for: .audio)
+        guard granted else {
+            throw IRENEError.permissionDenied("Microphone access denied")
         }
 
+        let settings: [String: Any] = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: 44100.0,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        ]
+
+        print("[IRENE Audio] Starting recording to: \(url.path)")
+
+        let recorder = try AVAudioRecorder(url: url, settings: settings)
+        recorder.isMeteringEnabled = true
+        recorder.delegate = self
+
+        guard recorder.record() else {
+            throw IRENEError.permissionDenied("Failed to start recording")
+        }
+
+        audioRecorder = recorder
         isRecording = true
         startTime = Date()
         startTimer()
+        startLevelMetering()
+
+        print("[IRENE Audio] Recording started successfully")
     }
 
     func stopRecording() -> (url: URL?, duration: TimeInterval) {
         stopTimer()
+        stopLevelMetering()
+
         let duration = elapsedTime
+        let url = audioRecorder?.url
 
-        audioEngine?.stop()
-        audioEngine?.inputNode.removeTap(onBus: 0)
-        audioFile = nil
-        audioEngine = nil
-
-        #if os(macOS)
-        scStream?.stopCapture()
-        scStream = nil
-        systemAudioFile = nil
-        #endif
+        audioRecorder?.stop()
+        audioRecorder = nil
 
         isRecording = false
         let elapsed = elapsedTime
         elapsedTime = 0
         audioLevel = 0
 
-        return (nil, elapsed) // URL is already known by caller
+        print("[IRENE Audio] Recording stopped, duration: \(elapsed)s")
+
+        return (url, elapsed)
     }
-
-    // MARK: - Mic Capture
-
-    private func startMicCapture(to url: URL) throws {
-        let engine = AVAudioEngine()
-        let inputNode = engine.inputNode
-        let format = inputNode.outputFormat(forBus: 0)
-
-        let file = try AVAudioFile(forWriting: url, settings: format.settings)
-        audioFile = file
-
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-            try? file.write(from: buffer)
-
-            // Calculate audio level
-            guard let channelData = buffer.floatChannelData?[0] else { return }
-            let frames = Int(buffer.frameLength)
-            var sum: Float = 0
-            for i in 0..<frames {
-                sum += channelData[i] * channelData[i]
-            }
-            let rms = sqrt(sum / Float(frames))
-            Task { @MainActor [weak self] in
-                self?.audioLevel = rms
-            }
-        }
-
-        try engine.start()
-        audioEngine = engine
-    }
-
-    // MARK: - System Audio (macOS)
-
-    #if os(macOS)
-    private func startSystemAndMicCapture(to url: URL, micEnabled: Bool) async throws {
-        // Start mic capture if enabled
-        if micEnabled {
-            try startMicCapture(to: url)
-        }
-
-        // System audio capture via ScreenCaptureKit
-        let availableContent = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
-
-        guard let display = availableContent.displays.first else {
-            throw IRENEError.permissionDenied("No display found for system audio capture")
-        }
-
-        let filter = SCContentFilter(display: display, excludingApplications: [], exceptingWindows: [])
-
-        let config = SCStreamConfiguration()
-        config.capturesAudio = true
-        config.excludesCurrentProcessAudio = true
-        config.width = 1
-        config.height = 1
-
-        let stream = SCStream(filter: filter, configuration: config, delegate: nil)
-        scStream = stream
-
-        try await stream.startCapture()
-    }
-    #endif
 
     // MARK: - Timer
 
@@ -150,5 +91,44 @@ final class AudioCaptureService {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
+    }
+
+    // MARK: - Audio Level Metering
+
+    private func startLevelMetering() {
+        levelTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                guard let self, let recorder = self.audioRecorder else { return }
+                recorder.updateMeters()
+                let level = recorder.averagePower(forChannel: 0)
+                // Convert dB to linear (0-1 range)
+                self.audioLevel = max(0, min(1, (level + 50) / 50))
+            }
+        }
+    }
+
+    private func stopLevelMetering() {
+        levelTimer?.invalidate()
+        levelTimer = nil
+    }
+}
+
+// MARK: - AVAudioRecorderDelegate
+
+extension AudioCaptureService: AVAudioRecorderDelegate {
+    nonisolated func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        if !flag {
+            Task { @MainActor in
+                self.isRecording = false
+                print("[IRENE Audio] Recording finished unsuccessfully")
+            }
+        }
+    }
+
+    nonisolated func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+        Task { @MainActor in
+            self.isRecording = false
+            print("[IRENE Audio] Recording encode error: \(error?.localizedDescription ?? "unknown")")
+        }
     }
 }

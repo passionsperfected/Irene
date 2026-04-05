@@ -1502,6 +1502,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "IRENE integrates with your calendar to show and create events.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "IRENE needs microphone access to record audio for meeting transcription.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "IRENE uses speech recognition to transcribe your recordings.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1526,6 +1529,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "IRENE integrates with your calendar to show and create events.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "IRENE needs microphone access to record audio for meeting transcription.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "IRENE uses speech recognition to transcribe your recordings.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

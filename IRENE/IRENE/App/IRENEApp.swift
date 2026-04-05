@@ -38,6 +38,7 @@ struct IRENEApp: App {
                 #if os(macOS)
                 appDelegate.vaultManager = vaultManager
                 appDelegate.themeManager = themeManager
+                NotificationDelegate.shared.vaultManager = vaultManager
                 #endif
             }
         }

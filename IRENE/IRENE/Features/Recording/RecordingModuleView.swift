@@ -22,12 +22,11 @@ struct RecordingModuleView: View {
             toolbar
             Divider().overlay(theme.border.opacity(0.3))
 
-            HSplitView {
-                // Left: recordings list + controls
+            HStack(spacing: 0) {
+                // Left: controls + recordings list
                 VStack(spacing: 0) {
                     RecordingControlsView(viewModel: viewModel)
-                        .themedCard()
-                        .padding(12)
+                        .padding(10)
 
                     Divider().overlay(theme.border.opacity(0.3))
 
@@ -35,13 +34,15 @@ struct RecordingModuleView: View {
                         EmptyStateView(
                             icon: "waveform",
                             title: "No Recordings",
-                            message: "Start recording a meeting above"
+                            message: "Hit record to start"
                         )
                     } else {
                         sessionList
                     }
                 }
-                .frame(minWidth: 300, maxWidth: 400)
+                .frame(minWidth: 280, maxWidth: 320)
+
+                Divider().overlay(theme.border.opacity(0.3))
 
                 // Right: detail (transcription + summary)
                 if let selectedSession {
@@ -63,18 +64,9 @@ struct RecordingModuleView: View {
 
     private var toolbar: some View {
         HStack {
-            Text("Recording")
+            Text("Recordings")
                 .font(Typography.bodySemiBold(size: 14))
                 .foregroundStyle(theme.primaryText)
-
-            if viewModel.captureService.isRecording {
-                HStack(spacing: 4) {
-                    Circle().fill(.red).frame(width: 6, height: 6)
-                    Text("Recording")
-                        .font(Typography.caption(size: 10))
-                        .foregroundStyle(.red)
-                }
-            }
 
             Spacer()
         }
@@ -137,12 +129,25 @@ struct RecordingModuleView: View {
         .contextMenu {
             if session.transcriptionFileName == nil && session.status == .complete {
                 Button("Transcribe") {
-                    Task { await viewModel.transcribeSession(session) }
+                    Task {
+                        await viewModel.transcribeSession(session)
+                        // Reload details after transcription completes
+                        if let updated = viewModel.sessions.first(where: { $0.id == session.id }) {
+                            selectedSession = updated
+                            await loadSessionDetails(updated)
+                        }
+                    }
                 }
             }
             if session.transcriptionFileName != nil && session.summaryFileName == nil {
                 Button("Summarize with AI") {
-                    Task { await viewModel.summarizeSession(session) }
+                    Task {
+                        await viewModel.summarizeSession(session)
+                        if let updated = viewModel.sessions.first(where: { $0.id == session.id }) {
+                            selectedSession = updated
+                            await loadSessionDetails(updated)
+                        }
+                    }
                 }
             }
             Divider()
@@ -190,12 +195,24 @@ struct RecordingModuleView: View {
                 HStack(spacing: 8) {
                     if session.transcriptionFileName == nil && session.status == .complete {
                         actionButton("Transcribe", icon: "text.quote") {
-                            Task { await viewModel.transcribeSession(session) }
+                            Task {
+                                await viewModel.transcribeSession(session)
+                                if let updated = viewModel.sessions.first(where: { $0.id == session.id }) {
+                                    selectedSession = updated
+                                    await loadSessionDetails(updated)
+                                }
+                            }
                         }
                     }
                     if session.transcriptionFileName != nil && session.summaryFileName == nil {
                         actionButton("Summarize", icon: "brain.head.profile") {
-                            Task { await viewModel.summarizeSession(session) }
+                            Task {
+                                await viewModel.summarizeSession(session)
+                                if let updated = viewModel.sessions.first(where: { $0.id == session.id }) {
+                                    selectedSession = updated
+                                    await loadSessionDetails(updated)
+                                }
+                            }
                         }
                     }
                 }
