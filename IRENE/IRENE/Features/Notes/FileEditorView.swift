@@ -4,6 +4,7 @@ struct FileEditorView: View {
     @Bindable var viewModel: FileEditorViewModel
     var llmService: LLMService?
     var onRename: ((String) -> Void)?
+    var scrollToLine: Int?
 
     @Environment(\.ireneTheme) private var theme
     @FocusState private var focusedField: FocusField?
@@ -69,6 +70,12 @@ struct FileEditorView: View {
                                     viewModel.content = newContent
                                 }
                             }
+                            // Scroll to line with extra delay to let text layout complete
+                            if let line = scrollToLine {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    bridge.scrollToLine(line)
+                                }
+                            }
                             #endif
                         }
                 }
@@ -95,46 +102,40 @@ struct FileEditorView: View {
                 await viewModel.saveImmediately()
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        showFindReplace = true
-                    }
-                } label: {
-                    EmptyView()
-                }
+        .overlay { keyboardShortcuts }
+    }
+
+    // MARK: - Keyboard Shortcuts (invisible)
+
+    @ViewBuilder
+    private var keyboardShortcuts: some View {
+        VStack {
+            Button { withAnimation(.easeInOut(duration: 0.15)) { showFindReplace = true } } label: { Color.clear }
                 .keyboardShortcut("f", modifiers: .command)
-                .hidden()
-            }
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        showFindReplace = true
-                    }
-                } label: {
-                    EmptyView()
-                }
+                .frame(width: 0, height: 0)
+                .opacity(0)
+
+            Button { withAnimation(.easeInOut(duration: 0.15)) { showFindReplace = true } } label: { Color.clear }
                 .keyboardShortcut("h", modifiers: [.command, .option])
-                .hidden()
-            }
-            // Font size shortcuts
-            ToolbarItem(placement: .automatic) {
-                Button { fontSize = min(fontSize + 1, 32) } label: { EmptyView() }
-                    .keyboardShortcut("+", modifiers: .command)
-                    .hidden()
-            }
-            ToolbarItem(placement: .automatic) {
-                Button { fontSize = min(fontSize + 1, 32) } label: { EmptyView() }
-                    .keyboardShortcut("=", modifiers: .command)
-                    .hidden()
-            }
-            ToolbarItem(placement: .automatic) {
-                Button { fontSize = max(fontSize - 1, 9) } label: { EmptyView() }
-                    .keyboardShortcut("-", modifiers: .command)
-                    .hidden()
-            }
+                .frame(width: 0, height: 0)
+                .opacity(0)
+
+            Button { fontSize = min(fontSize + 1, 32) } label: { Color.clear }
+                .keyboardShortcut("+", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+
+            Button { fontSize = min(fontSize + 1, 32) } label: { Color.clear }
+                .keyboardShortcut("=", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+
+            Button { fontSize = max(fontSize - 1, 9) } label: { Color.clear }
+                .keyboardShortcut("-", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
         }
+        .allowsHitTesting(false)
     }
 
     // MARK: - Toolbar

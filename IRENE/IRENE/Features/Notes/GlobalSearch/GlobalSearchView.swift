@@ -38,6 +38,9 @@ struct GlobalSearchView: View {
         }
         .background(theme.background)
         .onAppear { isSearchFocused = true }
+        #if os(macOS)
+        .onExitCommand { onClose() }
+        #endif
     }
 
     private var header: some View {
@@ -121,24 +124,30 @@ struct GlobalSearchView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(viewModel.groupedResults) { group in
-                    // File header
-                    HStack(spacing: 4) {
-                        Image(systemName: "doc.text")
-                            .font(.system(size: 9))
-                            .foregroundStyle(theme.accent)
-                        Text(group.fileName)
-                            .font(Typography.bodySemiBold(size: 11))
-                            .foregroundStyle(theme.primaryText)
-                        Text("(\(group.results.count))")
-                            .font(Typography.caption(size: 9))
-                            .foregroundStyle(theme.secondaryText.opacity(0.5))
-                        Spacer()
+                    // File header — click opens file without scrolling to a line
+                    Button {
+                        onSelectResult(group.fileURL, 0)
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "doc.text")
+                                .font(.system(size: 9))
+                                .foregroundStyle(theme.accent)
+                            Text(group.fileName)
+                                .font(Typography.bodySemiBold(size: 11))
+                                .foregroundStyle(theme.primaryText)
+                            Text("(\(group.results.count))")
+                                .font(Typography.caption(size: 9))
+                                .foregroundStyle(theme.secondaryText.opacity(0.5))
+                            Spacer()
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .contentShape(Rectangle())
+                        .background(theme.secondaryBackground.opacity(0.5))
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(theme.secondaryBackground.opacity(0.5))
+                    .buttonStyle(.plain)
 
-                    // Results
+                    // Results — click opens file and scrolls to that line
                     ForEach(group.results) { result in
                         Button {
                             onSelectResult(result.fileURL, result.lineNumber)

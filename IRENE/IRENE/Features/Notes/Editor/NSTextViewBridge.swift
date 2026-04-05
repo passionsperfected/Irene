@@ -442,18 +442,11 @@ final class NSTextViewBridge: EditorFindDelegate {
         textView?.scrollRangeToVisible(range)
     }
 
-    func clearHighlights() {
-        guard let textView, let layoutManager = textView.layoutManager,
-              let textStorage = textView.textStorage else { return }
-        let fullRange = NSRange(location: 0, length: textStorage.length)
-        layoutManager.removeTemporaryAttribute(.backgroundColor, forCharacterRange: fullRange)
-    }
-
-    // MARK: - Scroll to Line
-
     func scrollToLine(_ lineNumber: Int) {
         guard let textView else { return }
         let nsString = textView.string as NSString
+        guard nsString.length > 0 else { return }
+
         var currentLine = 1
         var charIndex = 0
 
@@ -463,8 +456,22 @@ final class NSTextViewBridge: EditorFindDelegate {
             currentLine += 1
         }
 
-        textView.setSelectedRange(NSRange(location: charIndex, length: 0))
-        textView.scrollRangeToVisible(NSRange(location: charIndex, length: 0))
+        // Place cursor at end of the target line (before the newline)
+        let lineRange = nsString.lineRange(for: NSRange(location: charIndex, length: 0))
+        let lineText = nsString.substring(with: lineRange)
+        let lineEnd = lineRange.location + lineRange.length - (lineText.hasSuffix("\n") ? 1 : 0)
+        let targetIndex = min(lineEnd, nsString.length)
+
+        textView.setSelectedRange(NSRange(location: targetIndex, length: 0))
+        textView.scrollRangeToVisible(NSRange(location: targetIndex, length: 0))
+        textView.window?.makeFirstResponder(textView)
+    }
+
+    func clearHighlights() {
+        guard let textView, let layoutManager = textView.layoutManager,
+              let textStorage = textView.textStorage else { return }
+        let fullRange = NSRange(location: 0, length: textStorage.length)
+        layoutManager.removeTemporaryAttribute(.backgroundColor, forCharacterRange: fullRange)
     }
 
     // MARK: - Tab Indent / Outdent (Event Monitor)

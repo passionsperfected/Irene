@@ -43,8 +43,9 @@ struct NotesModuleView: View {
                 GlobalSearchView(
                     viewModel: gsVM,
                     onSelectResult: { url, line in
+                        showGlobalSearch = false
                         treeVM.selectedFile = url
-                        pendingScrollToLine = line
+                        pendingScrollToLine = line > 0 ? line : nil
                     },
                     onClose: { showGlobalSearch = false }
                 )
@@ -59,12 +60,18 @@ struct NotesModuleView: View {
             Divider().overlay(theme.border.opacity(0.3))
 
             if let editorVM = editorViewModel {
-                FileEditorView(viewModel: editorVM, llmService: llmService) { newName in
-                    renameCurrentFile(newName, treeVM: treeVM, editorVM: editorVM)
-                }
+                FileEditorView(
+                    viewModel: editorVM,
+                    llmService: llmService,
+                    onRename: { newName in
+                        renameCurrentFile(newName, treeVM: treeVM, editorVM: editorVM)
+                    },
+                    scrollToLine: pendingScrollToLine
+                )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipped()
                 .id(editorVM.fileURL)
+                .onAppear { pendingScrollToLine = nil }
             } else {
                 EmptyStateView(
                     icon: "doc.text",
@@ -78,17 +85,17 @@ struct NotesModuleView: View {
         .onChange(of: treeVM.selectionGeneration) { _, _ in
             handleFileSelection(treeVM.selectedFile)
         }
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    if globalSearchVM == nil {
-                        globalSearchVM = GlobalSearchViewModel(rootURL: treeVM.rootURL)
-                    }
-                    showGlobalSearch.toggle()
-                } label: { EmptyView() }
-                .keyboardShortcut("f", modifiers: [.command, .shift])
-                .hidden()
-            }
+        .overlay {
+            Button {
+                if globalSearchVM == nil {
+                    globalSearchVM = GlobalSearchViewModel(rootURL: treeVM.rootURL)
+                }
+                showGlobalSearch.toggle()
+            } label: { Color.clear }
+            .keyboardShortcut("f", modifiers: [.command, .shift])
+            .frame(width: 0, height: 0)
+            .opacity(0)
+            .allowsHitTesting(false)
         }
     }
     #else
