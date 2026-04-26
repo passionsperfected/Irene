@@ -3,6 +3,7 @@ import SwiftUI
 struct CalendarModuleView: View {
     @State private var viewModel = CalendarViewModel()
     @State private var showNewEvent = false
+    @State private var editingEvent: CalendarEvent?
 
     @Environment(\.ireneTheme) private var theme
 
@@ -26,6 +27,27 @@ struct CalendarModuleView: View {
                     isAllDay: allDay, location: location, notes: notes
                 )
             }
+        }
+        .sheet(item: $editingEvent) { event in
+            EventDetailView(
+                event: event,
+                onSave: { title, start, end, allDay, location, notes in
+                    try await viewModel.updateEvent(
+                        id: event.id, title: title, startDate: start, endDate: end,
+                        isAllDay: allDay, location: location, notes: notes
+                    )
+                },
+                onDelete: {
+                    try await viewModel.deleteEvent(id: event.id)
+                }
+            )
+        }
+        .overlay {
+            Button { showNewEvent = true } label: { Color.clear }
+                .keyboardShortcut("n", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .allowsHitTesting(false)
         }
     }
 
@@ -76,8 +98,8 @@ struct CalendarModuleView: View {
     }
 
     private var calendarContent: some View {
-        HSplitView {
-            // Month view
+        HStack(spacing: 0) {
+            // Left: Month view
             VStack(spacing: 12) {
                 Text(viewModel.selectedDate.formatted(.dateTime.month(.wide).year()))
                     .font(Typography.subheading(size: 16))
@@ -97,7 +119,9 @@ struct CalendarModuleView: View {
             .frame(minWidth: 280, maxWidth: 320)
             .padding(.top, 12)
 
-            // Day detail
+            Divider().overlay(theme.border.opacity(0.3))
+
+            // Right: Day detail
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
                     Text(viewModel.selectedDate.formatted(date: .complete, time: .omitted))
@@ -122,65 +146,86 @@ struct CalendarModuleView: View {
                         actionLabel: "New Event"
                     )
                 } else {
-                    List {
-                        ForEach(viewModel.eventsForSelectedDate) { event in
-                            eventRow(event)
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            ForEach(viewModel.eventsForSelectedDate) { event in
+                                eventRow(event)
+                                Divider().overlay(theme.border.opacity(0.1))
+                            }
                         }
                     }
-                    .listStyle(.plain)
-                    .scrollContentBackground(.hidden)
                 }
             }
         }
     }
 
     private func eventRow(_ event: CalendarEvent) -> some View {
-        HStack(spacing: 10) {
-            Rectangle()
-                .fill(theme.accent)
-                .frame(width: 3)
-                .clipShape(RoundedRectangle(cornerRadius: 2))
+        Button {
+            editingEvent = event
+        } label: {
+            HStack(spacing: 12) {
+                // Time indicator
+                Rectangle()
+                    .fill(theme.accent)
+                    .frame(width: 3)
+                    .clipShape(RoundedRectangle(cornerRadius: 2))
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(event.title)
-                    .font(Typography.bodySemiBold(size: 13))
-                    .foregroundStyle(theme.primaryText)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(event.title)
+                        .font(Typography.bodySemiBold(size: 13))
+                        .foregroundStyle(theme.primaryText)
 
-                HStack(spacing: 6) {
-                    if event.isAllDay {
-                        Text("All Day")
-                            .font(Typography.caption(size: 10))
-                            .foregroundStyle(theme.accent)
-                    } else {
-                        Text("\(event.startDate.formatted(date: .omitted, time: .shortened)) - \(event.endDate.formatted(date: .omitted, time: .shortened))")
-                            .font(Typography.caption(size: 10))
-                            .foregroundStyle(theme.secondaryText)
-                    }
+                    HStack(spacing: 8) {
+                        if event.isAllDay {
+                            Text("All Day")
+                                .font(Typography.caption(size: 10))
+                                .foregroundStyle(theme.accent)
+                        } else {
+                            Text("\(event.startDate.formatted(date: .omitted, time: .shortened)) – \(event.endDate.formatted(date: .omitted, time: .shortened))")
+                                .font(Typography.caption(size: 10))
+                                .foregroundStyle(theme.secondaryText)
+                        }
 
-                    if let location = event.location, !location.isEmpty {
-                        Text(location)
+                        if let location = event.location, !location.isEmpty {
+                            HStack(spacing: 3) {
+                                Image(systemName: "mappin")
+                                    .font(.system(size: 8))
+                                Text(location)
+                                    .lineLimit(1)
+                            }
                             .font(Typography.caption(size: 10))
                             .foregroundStyle(theme.secondaryText.opacity(0.6))
+                        }
+                    }
+
+                    if let notes = event.notes, !notes.isEmpty {
+                        Text(notes)
+                            .font(Typography.body(size: 11))
+                            .foregroundStyle(theme.secondaryText.opacity(0.5))
+                            .lineLimit(2)
                     }
                 }
+
+                Spacer()
+
+                Text(event.calendarName)
+                    .font(Typography.caption(size: 8))
+                    .foregroundStyle(theme.secondaryText.opacity(0.4))
             }
-
-            Spacer()
-
-            Text(event.calendarName)
-                .font(Typography.caption(size: 8))
-                .foregroundStyle(theme.secondaryText.opacity(0.5))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
         }
-        .padding(.vertical, 4)
+        .buttonStyle(.plain)
     }
 
     private var permissionView: some View {
         EmptyStateView(
             icon: "calendar.badge.exclamationmark",
             title: "Calendar Access Required",
-            message: "IRENE needs access to your calendar to show events and create new ones. Grant access in System Settings > Privacy & Security > Calendars.",
+            message: "IRENE needs access to your calendar to show and create events.",
             action: { Task { await viewModel.requestAccess() } },
-            actionLabel: "Request Access"
+            actionLabel: "Grant Access"
         )
     }
 }

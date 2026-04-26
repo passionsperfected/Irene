@@ -22,7 +22,10 @@
       "Bash(xargs ls:*)",
       "Bash(sw_vers -productVersion)",
       "Bash(afinfo \"/Users/jdaigle/Desktop/test_vault/recording/audio/52A6770C-42A7-4839-A69E-2A8C32F7E9FA.m4a\")",
-      "Bash(ls -la /Users/jdaigle/Desktop/test_vault/recording/audio/*.m4a)"
+      "Bash(ls -la /Users/jdaigle/Desktop/test_vault/recording/audio/*.m4a)",
+      "Bash(find /Users/jdaigle/core/career/passions_perfected/repositories/irene/IRENE -type f -name *Mail*)",
+      "Bash(xcodebuild -project IRENE/IRENE.xcodeproj -scheme IRENE -destination 'platform=macOS' build)",
+      "Bash(xcodebuild:*)"
     ]
   }
 }

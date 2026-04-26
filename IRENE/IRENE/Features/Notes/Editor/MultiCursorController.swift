@@ -1,6 +1,7 @@
 #if os(macOS)
 import AppKit
 
+@MainActor
 class MultiCursorController {
     var state = MultiCursorState()
     weak var textView: SublimeTextView?
@@ -254,8 +255,6 @@ class MultiCursorController {
 
         for cursor in sortedForward {
             let deleteLen = cursor.range.length > 0 ? cursor.range.length : (cursor.range.location > 0 ? 1 : 0)
-            let newLocation = max(0, cursor.range.location + delta - (cursor.range.length > 0 ? cursor.range.length : 1) + cursor.range.length)
-            let loc = cursor.range.location + delta
             let adjustedLoc = cursor.range.length > 0 ? cursor.range.location + delta : max(0, cursor.range.location + delta - 1)
             delta -= deleteLen
             newSelections.append(CursorSelection(range: NSRange(location: adjustedLoc, length: 0)))

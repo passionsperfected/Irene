@@ -62,6 +62,7 @@
 		2C5BAC4313C1BB947318BC4C /* IRENEError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86D84405F64FC4F8BBDB61A /* IRENEError.swift */; };
 		2C84477A2644E51ABDF38C30 /* RecordingControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81155C226F5CB61A83889F8A /* RecordingControlsView.swift */; };
 		2CB763CF6CD6B6EB59B1FDE8 /* GlobalSearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297B30286BA28AE2A246019B /* GlobalSearchViewModel.swift */; };
+		30FC1A4DE1A8905745FA873F /* MailHTMLView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37DB8F0D7251E55C984A9F6 /* MailHTMLView.swift */; };
 		36F2BCF7706F8B23DC71AEAD /* LLMModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107E56C75FE581A9C3EF43C0 /* LLMModel.swift */; };
 		38C9074B2AD5B39404ED937A /* ConversationListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7223F2901339BAB6D5E3B5A /* ConversationListViewModel.swift */; };
 		392FB6DEDBC8F09EA8D0512F /* VaultManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78625A9E3CDB2323D08D2627 /* VaultManager.swift */; };
@@ -92,6 +93,7 @@
 		524CA375EE508904879239D8 /* solar-amber.json in Resources */ = {isa = PBXBuildFile; fileRef = D868FE1706510C6FF3D41555 /* solar-amber.json */; };
 		542EB4DDB899014900E9509C /* cloud-sky.json in Resources */ = {isa = PBXBuildFile; fileRef = 0D04F0BD60E278DA8BD232FE /* cloud-sky.json */; };
 		54F02404A02532A140F8962C /* ItemMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 936AA30AA692D5565ED1F500 /* ItemMetadata.swift */; };
+		5501998E4594D438EFA27395 /* MailMailbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A6BFE820B4CC3E75490EB95 /* MailMailbox.swift */; };
 		57A09B678F95ABE14849586E /* GlobalSearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297B30286BA28AE2A246019B /* GlobalSearchViewModel.swift */; };
 		594CBBC60734F8E49FB51A23 /* RecordingModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3E43899AED285CAB8350BA /* RecordingModuleView.swift */; };
 		5C7C632D50737BE6A89DB804 /* SublimeTextViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2179FFAB7A376D32B04807 /* SublimeTextViewTests.swift */; };
@@ -141,6 +143,7 @@
 		7DBB6514FDAD26EF64B0B347 /* ToDoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8622A32FC30DA368186BDED /* ToDoItem.swift */; };
 		7E501023F7A0B3177E77C9FF /* parchment.json in Resources */ = {isa = PBXBuildFile; fileRef = 88F73B84554A8056CDA9D26D /* parchment.json */; };
 		7F3FCD69B2BE8D9FD8914688 /* AudioCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD049C922AC4EC0290B2C44 /* AudioCaptureService.swift */; };
+		7F58E69A1F7C7B770069BF24 /* MailMailbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A6BFE820B4CC3E75490EB95 /* MailMailbox.swift */; };
 		801EBD13538E74096D02291F /* MarkdownRendererView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122B3C047B9CFDAB484C8B0E /* MarkdownRendererView.swift */; };
 		84914430296408F5C19835DE /* RecordingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5E30279B20942955F421B0 /* RecordingViewModel.swift */; };
 		884CFF28D028AF80C0E6D5C6 /* FileEditorViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F39B500A57B49EF4F74E5117 /* FileEditorViewModelTests.swift */; };
@@ -210,6 +213,7 @@
 		C5D3F425E8BAD1539CB217B7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310230D43D9752659F475569 /* SettingsView.swift */; };
 		C606C55FFD7D2359909D658F /* MailMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27B6F5E388C7787EE3E8E74 /* MailMessage.swift */; };
 		C617F7EBA972615797ED037B /* RecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A73AF5081ED8D581025220C0 /* RecordingSession.swift */; };
+		C6E23A4EE43BF9B1CEBAD0DC /* MailReplyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC44F8E5F20265FBEC54454E /* MailReplyView.swift */; };
 		C720A1F63DF34F7ABB0971B0 /* SystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4812F7D06942CF626D6F94 /* SystemPrompt.swift */; };
 		C8E1A2ABBC507F76BCE0FEDF /* MiniCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046FFFC5808D996AEA6648F5 /* MiniCalendarView.swift */; };
 		C94DBF459917B8C5529C111C /* obsidian-copper.json in Resources */ = {isa = PBXBuildFile; fileRef = 4D100D7A36A7C4530CF4CE91 /* obsidian-copper.json */; };
@@ -228,6 +232,7 @@
 		D8C84D5CD9B3105872AFF6D9 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE444E53B9E6B68D07B5F966 /* DashboardViewModel.swift */; };
 		D8D2AF836B261B80CC4C015E /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09C3A2C9A95F2C5801B60DA /* Note.swift */; };
 		DA4AD491C8CDCC5E9C628B23 /* EditorThemeAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1887612F74694BD0D783F598 /* EditorThemeAdapter.swift */; };
+		DA9FDF99164BCEB637F1030D /* MailHTMLView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37DB8F0D7251E55C984A9F6 /* MailHTMLView.swift */; };
 		DAB9C8958DEEB95B5C2696B0 /* HotkeyPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 474AB0A85E5EF62A64E2D436 /* HotkeyPanel.swift */; };
 		DCB64207A0FDB387447207F9 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506B1D0D4668DDD2F9950A0B /* DashboardView.swift */; };
 		DE2FC3F55AF3BCAA54B4C4D3 /* FileTreeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C855CD02F324FC72F2BF3E8 /* FileTreeViewModel.swift */; };
@@ -241,6 +246,7 @@
 		E42BFCAA0C28E5A03D8FDA3C /* StickiesModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B12563FBED40346CEEE7A8 /* StickiesModuleView.swift */; };
 		E466BC8B6E97C39E039C387F /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6DD9CA2BA6FE8471062E6A9 /* LLMService.swift */; };
 		E4670F306789C30D4347430D /* RecordingSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BB6028300F1C1E59AC3DC5 /* RecordingSummaryView.swift */; };
+		E47716721112523DFF32C090 /* MailReplyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC44F8E5F20265FBEC54454E /* MailReplyView.swift */; };
 		E64B554EE42DE26E3685AC03 /* ToDoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE707E6192AF39A3B4F14BD /* ToDoViewModel.swift */; };
 		E6DDFF6A075218D8429258F6 /* ChatModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A264910C2EB91E8C558B3B1 /* ChatModuleView.swift */; };
 		E70A260DE4DF30FEB3EAD162 /* TagEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5143FA2243D76348C155CA6 /* TagEditor.swift */; };
@@ -365,6 +371,7 @@
 		9827D8B644BCA5E0769D9374 /* VaultConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultConfiguration.swift; sourceTree = "<group>"; };
 		99184EA965EC9A4E6FC9EE5D /* StickyNoteCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyNoteCard.swift; sourceTree = "<group>"; };
 		99805E2A51084D9C4174D229 /* IRENE_iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = IRENE_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A6BFE820B4CC3E75490EB95 /* MailMailbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailMailbox.swift; sourceTree = "<group>"; };
 		9AF376DAAFC6DEB247A341FE /* cyberpunk.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = cyberpunk.json; sourceTree = "<group>"; };
 		9B2179FFAB7A376D32B04807 /* SublimeTextViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SublimeTextViewTests.swift; sourceTree = "<group>"; };
 		9E972BA90649F192588CC0B2 /* ReminderQuickCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderQuickCaptureView.swift; sourceTree = "<group>"; };
@@ -383,8 +390,10 @@
 		B7B7611D06DC79AC630376B7 /* deep-ocean.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "deep-ocean.json"; sourceTree = "<group>"; };
 		B8A16A12AFC2E93E60384D3F /* FileEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileEditorViewModel.swift; sourceTree = "<group>"; };
 		BA84BAAB7256C24F385D4DAD /* MailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailViewModel.swift; sourceTree = "<group>"; };
+		BC44F8E5F20265FBEC54454E /* MailReplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailReplyView.swift; sourceTree = "<group>"; };
 		BE5478FD0ACA3A407E707239 /* ThemeEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeEnvironment.swift; sourceTree = "<group>"; };
 		C200D04DAB6274131AB6DE57 /* CalendarModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarModuleView.swift; sourceTree = "<group>"; };
+		C37DB8F0D7251E55C984A9F6 /* MailHTMLView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailHTMLView.swift; sourceTree = "<group>"; };
 		C8C0DEA0EBD57DA8DD3A12BB /* FileCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCoordinator.swift; sourceTree = "<group>"; };
 		CC07B4F48496171024B87014 /* neon-noir.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "neon-noir.json"; sourceTree = "<group>"; };
 		CF9878C2E37642ADEC49893C /* StickyNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyNote.swift; sourceTree = "<group>"; };
@@ -499,7 +508,9 @@
 			children = (
 				B4185F3A1B1CAC37CCD80AF3 /* MailBridge.swift */,
 				4179C3E4AFC18D9303797EE3 /* MailComposeView.swift */,
+				C37DB8F0D7251E55C984A9F6 /* MailHTMLView.swift */,
 				509FE3CA47E08765984A1A85 /* MailModuleView.swift */,
+				BC44F8E5F20265FBEC54454E /* MailReplyView.swift */,
 				BA84BAAB7256C24F385D4DAD /* MailViewModel.swift */,
 			);
 			path = Mail;
@@ -728,6 +739,7 @@
 				38D4F896F63E98ED89771E8D /* ChatConversation.swift */,
 				E86D84405F64FC4F8BBDB61A /* IRENEError.swift */,
 				936AA30AA692D5565ED1F500 /* ItemMetadata.swift */,
+				9A6BFE820B4CC3E75490EB95 /* MailMailbox.swift */,
 				E27B6F5E388C7787EE3E8E74 /* MailMessage.swift */,
 				A09C3A2C9A95F2C5801B60DA /* Note.swift */,
 				A73AF5081ED8D581025220C0 /* RecordingSession.swift */,
@@ -1072,8 +1084,11 @@
 				B6AF1ABAE375369E036BC207 /* LineNumbersView.swift in Sources */,
 				C06A75B4788E1EFC41180B8F /* MailBridge.swift in Sources */,
 				266ECB91AFF622336FB676A2 /* MailComposeView.swift in Sources */,
+				DA9FDF99164BCEB637F1030D /* MailHTMLView.swift in Sources */,
+				5501998E4594D438EFA27395 /* MailMailbox.swift in Sources */,
 				26D7AAABFE87F82122046831 /* MailMessage.swift in Sources */,
 				E31356AA49A15058C37325AD /* MailModuleView.swift in Sources */,
+				C6E23A4EE43BF9B1CEBAD0DC /* MailReplyView.swift in Sources */,
 				76F2EB710E30476786A2D70E /* MailViewModel.swift in Sources */,
 				681BA0D084035FDCC543A268 /* MarkdownRendererView.swift in Sources */,
 				FDAC5C0B79D974AA31CF4041 /* MarkdownStorage.swift in Sources */,
@@ -1197,8 +1212,11 @@
 				18ED7C294033303B33793107 /* LineNumbersView.swift in Sources */,
 				B27BAB81B81071D6D60129BB /* MailBridge.swift in Sources */,
 				463064CC51253D810200E022 /* MailComposeView.swift in Sources */,
+				30FC1A4DE1A8905745FA873F /* MailHTMLView.swift in Sources */,
+				7F58E69A1F7C7B770069BF24 /* MailMailbox.swift in Sources */,
 				C606C55FFD7D2359909D658F /* MailMessage.swift in Sources */,
 				ECA2DBC903ADD4EF79C4212E /* MailModuleView.swift in Sources */,
+				E47716721112523DFF32C090 /* MailReplyView.swift in Sources */,
 				8A5BF464899CE357E60D0117 /* MailViewModel.swift in Sources */,
 				801EBD13538E74096D02291F /* MarkdownRendererView.swift in Sources */,
 				2A7641E2BC5695622DA04B28 /* MarkdownStorage.swift in Sources */,
@@ -1502,6 +1520,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "IRENE uses Apple Events to read and send email through Mail.app.";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "IRENE integrates with your calendar to show and create events.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "IRENE needs microphone access to record audio for meeting transcription.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "IRENE uses speech recognition to transcribe your recordings.";
@@ -1529,6 +1548,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "IRENE uses Apple Events to read and send email through Mail.app.";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "IRENE integrates with your calendar to show and create events.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "IRENE needs microphone access to record audio for meeting transcription.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "IRENE uses speech recognition to transcribe your recordings.";

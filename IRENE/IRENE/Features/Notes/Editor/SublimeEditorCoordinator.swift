@@ -72,7 +72,7 @@ class SublimeEditorCoordinator: NSObject, NSTextViewDelegate {
 
 // MARK: - EditorFindDelegate conformance on SublimeTextView
 
-extension SublimeTextView: @preconcurrency EditorFindDelegate {
+extension SublimeTextView: EditorFindDelegate {
     func highlightMatches(_ matches: [NSRange], currentIndex: Int) {
         guard let layoutManager = layoutManager, let textStorage = textStorage else { return }
         let fullRange = NSRange(location: 0, length: textStorage.length)

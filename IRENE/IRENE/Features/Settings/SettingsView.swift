@@ -426,27 +426,35 @@ struct SettingsView: View {
     }
 
     private func saveAllSettings() {
+        let currentAnthropicKey = anthropicKey
+        let currentOpenAIKey = openAIKey
+        let currentGrokKey = grokKey
+        let currentProvider = selectedProvider
+        let currentThemeId = themeManager.current.id
+        let currentPersonality = selectedPersonality
+        let currentSound = selectedCompletionSound
+
         Task {
             try? await vaultManager.updateConfiguration { config in
-                config.apiKeys["anthropic"] = anthropicKey.isEmpty ? nil : anthropicKey
-                config.apiKeys["openai"] = openAIKey.isEmpty ? nil : openAIKey
-                config.apiKeys["grok"] = grokKey.isEmpty ? nil : grokKey
-                config.selectedProvider = selectedProvider.rawValue
-                config.selectedTheme = themeManager.current.id
-                config.selectedPersonality = selectedPersonality
-                config.completionSound = selectedCompletionSound
+                config.apiKeys["anthropic"] = currentAnthropicKey.isEmpty ? nil : currentAnthropicKey
+                config.apiKeys["openai"] = currentOpenAIKey.isEmpty ? nil : currentOpenAIKey
+                config.apiKeys["grok"] = currentGrokKey.isEmpty ? nil : currentGrokKey
+                config.selectedProvider = currentProvider.rawValue
+                config.selectedTheme = currentThemeId
+                config.selectedPersonality = currentPersonality
+                config.completionSound = currentSound
             }
 
             // Update LLM service with new keys
             if let llmService {
-                if !anthropicKey.isEmpty {
-                    llmService.setAPIKey(anthropicKey, for: .anthropic)
+                if !currentAnthropicKey.isEmpty {
+                    llmService.setAPIKey(currentAnthropicKey, for: .anthropic)
                 }
-                if !openAIKey.isEmpty {
-                    llmService.setAPIKey(openAIKey, for: .openai)
+                if !currentOpenAIKey.isEmpty {
+                    llmService.setAPIKey(currentOpenAIKey, for: .openai)
                 }
-                if !grokKey.isEmpty {
-                    llmService.setAPIKey(grokKey, for: .grok)
+                if !currentGrokKey.isEmpty {
+                    llmService.setAPIKey(currentGrokKey, for: .grok)
                 }
             }
 

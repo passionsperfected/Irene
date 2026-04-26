@@ -70,6 +70,21 @@ final class CalendarViewModel {
         await loadEvents()
     }
 
+    func updateEvent(id: String, title: String, startDate: Date, endDate: Date, isAllDay: Bool, location: String?, notes: String?) async throws {
+        guard let event = eventStore.event(withIdentifier: id) else {
+            throw IRENEError.fileNotFound(URL(fileURLWithPath: id))
+        }
+        event.title = title
+        event.startDate = startDate
+        event.endDate = endDate
+        event.isAllDay = isAllDay
+        event.location = location
+        event.notes = notes
+
+        try eventStore.save(event, span: .thisEvent)
+        await loadEvents()
+    }
+
     func deleteEvent(id: String) async throws {
         guard let event = eventStore.event(withIdentifier: id) else {
             throw IRENEError.fileNotFound(URL(fileURLWithPath: id))

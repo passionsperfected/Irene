@@ -174,7 +174,7 @@ final class NSTextViewBridge: EditorFindDelegate {
         cursorOverlays.removeAll()
 
         guard let textView, let layoutManager = textView.layoutManager,
-              let textStorage = textView.textStorage, let theme = themeAdapter else { return }
+              let textStorage = textView.textStorage, let _ = themeAdapter else { return }
 
         let containerOrigin = textView.textContainerOrigin
 

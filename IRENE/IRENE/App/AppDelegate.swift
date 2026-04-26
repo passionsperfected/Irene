@@ -95,7 +95,7 @@ final class IRENEAppDelegate: NSObject, NSApplicationDelegate {
 // MARK: - Notification Delegate (shows notifications even when app is in foreground)
 
 class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
-    nonisolated(unsafe) static let shared = NotificationDelegate()
+    static let shared = NotificationDelegate()
     weak var vaultManager: VaultManager?
 
     // Show notification banner even when the app is frontmost

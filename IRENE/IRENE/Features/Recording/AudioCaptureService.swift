@@ -60,7 +60,6 @@ final class AudioCaptureService: NSObject, @unchecked Sendable {
     func stopRecording() -> (url: URL?, duration: TimeInterval) {
         stopTimer()
         stopLevelMetering()
-        let duration = elapsedTime
         let finalURL = outputURL
 
         // Stop mic recorder
@@ -217,7 +216,6 @@ final class AudioCaptureService: NSObject, @unchecked Sendable {
         print("[IRENE Audio] Merging mic + system audio via PCM mixdown...")
 
         let targetSampleRate: Double = 44100
-        let targetChannels: UInt32 = 1 // Mono — best for speech recognition
 
         do {
             // Read PCM samples from mic file
@@ -288,12 +286,13 @@ final class AudioCaptureService: NSObject, @unchecked Sendable {
             throw IRENEError.serializationFailed("Cannot create output buffer")
         }
 
-        var gotData = false
-        try converter.convert(to: outputBuffer, error: nil) { _, outStatus in
+        nonisolated(unsafe) var gotData = false
+        nonisolated(unsafe) let capturedBuffer = inputBuffer
+        converter.convert(to: outputBuffer, error: nil) { _, outStatus in
             if !gotData {
                 gotData = true
                 outStatus.pointee = .haveData
-                return inputBuffer
+                return capturedBuffer
             } else {
                 outStatus.pointee = .endOfStream
                 return nil
