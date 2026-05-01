@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I {} basename {})",
+      "Bash(xcodegen generate *)",
+      "Bash(xcodebuild -project IRENE.xcodeproj -scheme IRENE_macOS -configuration Debug -destination 'platform=macOS' build)",
+      "Bash(xcodebuild -project IRENE.xcodeproj -scheme IRENE_iOS -configuration Debug -destination 'generic/platform=iOS Simulator' build)",
+      "Bash(git *)",
+      "Bash(osascript -e 'id of application \"Mail\"')",
+      "Bash(osascript -e 'id of application \"Calendar\"')"
+    ]
+  }
+}

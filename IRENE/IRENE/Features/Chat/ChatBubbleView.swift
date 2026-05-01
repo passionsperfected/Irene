@@ -52,23 +52,12 @@ struct ChatBubbleView: View {
                             Text(message.content)
                                 .font(Typography.body(size: 14))
                                 .foregroundStyle(theme.primaryText)
+                                .textSelection(.enabled)
                         } else {
-                            // Render assistant markdown
-                            if let rendered = try? AttributedString(
-                                markdown: message.content,
-                                options: .init(interpretedSyntax: .full)
-                            ) {
-                                Text(rendered)
-                                    .font(Typography.body(size: 14))
-                                    .foregroundStyle(theme.primaryText)
-                            } else {
-                                Text(message.content)
-                                    .font(Typography.body(size: 14))
-                                    .foregroundStyle(theme.primaryText)
-                            }
+                            MarkdownContentView(markdown: message.content)
+                                .textSelection(.enabled)
                         }
                     }
-                    .textSelection(.enabled)
                     .padding(12)
                     .background(bubbleBackground)
                 }

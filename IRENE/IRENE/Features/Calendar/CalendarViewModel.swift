@@ -8,6 +8,8 @@ final class CalendarViewModel {
     private(set) var isLoading = false
     var selectedDate: Date = Date()
     var errorMessage: String?
+    var appLaunchPrompt: ExternalApp?
+    private var didCheckCalendarApp = false
 
     private let eventStore = EKEventStore()
 
@@ -36,12 +38,34 @@ final class CalendarViewModel {
         do {
             hasAccess = try await eventStore.requestFullAccessToEvents()
             if hasAccess {
+                #if os(macOS)
+                if !didCheckCalendarApp && !AppLauncher.isRunning(.calendar) {
+                    didCheckCalendarApp = true
+                    appLaunchPrompt = .calendar
+                }
+                #endif
                 await loadEvents()
             }
         } catch {
             errorMessage = error.localizedDescription
         }
     }
+
+    #if os(macOS)
+    func confirmLaunchApp() async {
+        guard let app = appLaunchPrompt else { return }
+        appLaunchPrompt = nil
+        do {
+            _ = try await AppLauncher.launch(app)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func cancelLaunchApp() {
+        appLaunchPrompt = nil
+    }
+    #endif
 
     func loadEvents() async {
         isLoading = true

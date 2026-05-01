@@ -17,13 +17,6 @@ import AppKit
 struct AppleScriptMailBridge: MailBridgeProtocol {
     let canReadMail = true
 
-    @MainActor
-    static var isMailRunning: Bool {
-        NSWorkspace.shared.runningApplications.contains {
-            $0.bundleIdentifier == "com.apple.mail"
-        }
-    }
-
     // MARK: - Mailboxes
 
     func fetchMailboxes() async throws -> [MailMailbox] {

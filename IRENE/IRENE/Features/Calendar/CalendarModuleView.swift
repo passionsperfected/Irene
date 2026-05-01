@@ -49,6 +49,25 @@ struct CalendarModuleView: View {
                 .opacity(0)
                 .allowsHitTesting(false)
         }
+        #if os(macOS)
+        .alert(
+            "Open \(viewModel.appLaunchPrompt?.displayName ?? "Calendar")?",
+            isPresented: Binding(
+                get: { viewModel.appLaunchPrompt != nil },
+                set: { if !$0 { viewModel.appLaunchPrompt = nil } }
+            ),
+            presenting: viewModel.appLaunchPrompt
+        ) { app in
+            Button("Open \(app.displayName)") {
+                Task { await viewModel.confirmLaunchApp() }
+            }
+            Button("Not Now", role: .cancel) {
+                viewModel.cancelLaunchApp()
+            }
+        } message: { app in
+            Text("IRENE works best with \(app.displayName) open so your changes stay in sync.")
+        }
+        #endif
     }
 
     private var toolbar: some View {

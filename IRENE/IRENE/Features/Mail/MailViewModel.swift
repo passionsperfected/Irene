@@ -10,6 +10,7 @@ final class MailViewModel {
     var selectedMessage: MailMessage?
     var searchText: String = ""
     var errorMessage: String?
+    var appLaunchPrompt: ExternalApp?
 
     private let bridge: any MailBridgeProtocol
 
@@ -46,8 +47,8 @@ final class MailViewModel {
         guard canRead else { return }
 
         #if os(macOS)
-        guard AppleScriptMailBridge.isMailRunning else {
-            errorMessage = "Mail.app is not running. Please open Mail first."
+        if !AppLauncher.isRunning(.mail) {
+            appLaunchPrompt = .mail
             return
         }
         #endif
@@ -165,4 +166,27 @@ final class MailViewModel {
             errorMessage = error.localizedDescription
         }
     }
+
+    // MARK: - App Launch Prompt
+
+    #if os(macOS)
+    func confirmLaunchApp() async {
+        guard let app = appLaunchPrompt else { return }
+        appLaunchPrompt = nil
+        do {
+            if try await AppLauncher.launch(app) {
+                await loadMailboxes()
+            } else {
+                errorMessage = "\(app.displayName) didn't open. Try opening it manually, then reload."
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func cancelLaunchApp() {
+        appLaunchPrompt = nil
+        errorMessage = "Mail can't load until Mail.app is open."
+    }
+    #endif
 }

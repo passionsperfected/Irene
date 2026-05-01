@@ -60,6 +60,25 @@ struct MailModuleView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
+        #if os(macOS)
+        .alert(
+            "Open \(viewModel.appLaunchPrompt?.displayName ?? "Mail")?",
+            isPresented: Binding(
+                get: { viewModel.appLaunchPrompt != nil },
+                set: { if !$0 { viewModel.appLaunchPrompt = nil } }
+            ),
+            presenting: viewModel.appLaunchPrompt
+        ) { app in
+            Button("Open \(app.displayName)") {
+                Task { await viewModel.confirmLaunchApp() }
+            }
+            Button("Cancel", role: .cancel) {
+                viewModel.cancelLaunchApp()
+            }
+        } message: { app in
+            Text("IRENE needs \(app.displayName) to be running to access your messages.")
+        }
+        #endif
     }
 
     private var toolbar: some View {
