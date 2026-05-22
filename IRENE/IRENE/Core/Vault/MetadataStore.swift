@@ -46,6 +46,8 @@ struct MetadataStore: Sendable {
             metadataDir = vaultURL.appendingPathComponent("settings/metadata/chats")
         case .recording:
             metadataDir = vaultURL.appendingPathComponent("settings/metadata/recording")
+        case .sprint:
+            metadataDir = vaultURL.appendingPathComponent("settings/metadata/sprints")
         }
         return try await storage.loadAll(in: metadataDir)
     }

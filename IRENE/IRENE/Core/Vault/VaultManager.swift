@@ -64,6 +64,7 @@ final class VaultManager: @unchecked Sendable {
         case .reminder: return vaultURL.appendingPathComponent("reminders")
         case .chat: return vaultURL.appendingPathComponent("chats")
         case .recording: return vaultURL.appendingPathComponent("recording")
+        case .sprint: return vaultURL.appendingPathComponent("sprints")
         }
     }
 

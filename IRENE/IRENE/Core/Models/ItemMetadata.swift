@@ -7,6 +7,7 @@ enum ModuleType: String, Codable, CaseIterable, Sendable {
     case reminder
     case chat
     case recording
+    case sprint
 }
 
 struct ItemMetadata: Codable, Identifiable, Sendable {

@@ -10,10 +10,41 @@ final class LLMService {
 
     private var apiKeys: [LLMProviderType: String] = [:]
     private let vaultManager: VaultManager
+    let certificateManager = CertificateManager()
+    private(set) var workLLMConfigured: Bool = false
+    private(set) var workLLMConfigError: String?
 
     init(vaultManager: VaultManager) {
         self.vaultManager = vaultManager
         loadAPIKeys()
+        if vaultManager.configuration.useWorkLLM {
+            tryConfigureWorkLLM()
+        }
+    }
+
+    /// Attempt to load the certificates from the paths in vault config.
+    /// Sets `workLLMConfigured` and `workLLMConfigError` for the UI.
+    func tryConfigureWorkLLM() {
+        let chain = vaultManager.configuration.workLLMChainPath
+        let key = vaultManager.configuration.workLLMPrivateKeyPath
+        guard !chain.isEmpty, !key.isEmpty else {
+            workLLMConfigured = false
+            workLLMConfigError = "Set chain and private-key paths in Settings."
+            return
+        }
+        do {
+            try certificateManager.configure(chainPath: chain, privatePath: key)
+            workLLMConfigured = true
+            workLLMConfigError = nil
+        } catch {
+            workLLMConfigured = false
+            workLLMConfigError = error.localizedDescription
+            Log.error("Work LLM cert configure failed: \(error)")
+        }
+    }
+
+    var useWorkLLM: Bool {
+        vaultManager.configuration.useWorkLLM
     }
 
     // MARK: - Configuration
@@ -38,6 +69,7 @@ final class LLMService {
     }
 
     var isConfigured: Bool {
+        if useWorkLLM { return workLLMConfigured }
         guard let key = apiKeys[activeProviderType], !key.isEmpty else { return false }
         return true
     }
@@ -91,6 +123,20 @@ final class LLMService {
         // Re-read keys from vault config in case they were loaded after init
         if apiKeys.isEmpty {
             loadAPIKeys()
+        }
+
+        // Work LLM toggle wins over the provider picker — both routes reach
+        // Claude, but via different transports.
+        if useWorkLLM {
+            guard workLLMConfigured, let session = certificateManager.createURLSession() else {
+                return nil
+            }
+            let endpoint = vaultManager.configuration.workLLMEndpoint
+            return FloodgateProvider(
+                session: session,
+                modelOverride: nil,
+                endpointOverride: endpoint.isEmpty ? nil : endpoint
+            )
         }
 
         switch activeProviderType {

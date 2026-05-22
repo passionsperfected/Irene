@@ -120,6 +120,14 @@ struct ContentView: View {
             CalendarModuleView()
         case .recording:
             RecordingModuleView(vaultManager: vaultManager, llmService: llmService)
+        case .sprints:
+            SprintsModuleView(vaultManager: vaultManager)
+        case .github:
+            GitHubModuleView()
+        case .radar:
+            RadarModuleView()
+        case .vacation:
+            VacationModuleView()
         case nil:
             DashboardView(vaultManager: vaultManager, llmService: llmService) { module in
                 appState.selectedModule = module

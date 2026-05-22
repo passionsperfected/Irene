@@ -49,9 +49,12 @@ targets:
     entitlements:
       path: IRENE/Resources/IRENE.entitlements
       properties:
-        com.apple.security.app-sandbox: true
-        com.apple.security.files.user-selected.read-write: true
-        com.apple.security.files.bookmarks.app-scope: true
+        # Sandbox is intentionally OFF. IRENE needs unsandboxed access to:
+        #   * spawn `gh` and `appleconnect` CLI helpers (Process)
+        #   * read user-supplied PEM certificate files at any path
+        #   * read/write configs under ~/__ai/irene_configs/
+        #   * outbound mTLS to Apple's internal AI gateway (Floodgate)
+        com.apple.security.app-sandbox: false
         com.apple.security.network.client: true
         com.apple.security.device.audio-input: true
         com.apple.security.personal-information.calendars: true

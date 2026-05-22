@@ -7,7 +7,12 @@
       "Bash(xcodebuild -project IRENE.xcodeproj -scheme IRENE_iOS -configuration Debug -destination 'generic/platform=iOS Simulator' build)",
       "Bash(git *)",
       "Bash(osascript -e 'id of application \"Mail\"')",
-      "Bash(osascript -e 'id of application \"Calendar\"')"
+      "Bash(osascript -e 'id of application \"Calendar\"')",
+      "Bash(xcodegen --version)",
+      "Bash(xcodebuild -project IRENE/IRENE.xcodeproj -scheme IRENE_macOS -destination 'platform=macOS' -configuration Debug build)",
+      "Bash(xcodebuild -project IRENE.xcodeproj -scheme IRENE_macOS -destination 'platform=macOS' -configuration Debug build)",
+      "Bash(xcodebuild -project IRENE.xcodeproj -scheme IRENE_iOS -destination 'generic/platform=iOS Simulator' -configuration Debug build)",
+      "Read(//Users/jdaigle/__ai/**)"
     ]
   }
 }

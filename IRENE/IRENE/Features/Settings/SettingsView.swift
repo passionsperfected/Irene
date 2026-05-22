@@ -19,6 +19,12 @@ struct SettingsView: View {
     @State private var hasUnsavedChanges: Bool = false
     @State private var saveConfirmation: Bool = false
 
+    // Work LLM (Floodgate / mTLS)
+    @State private var useWorkLLM: Bool = false
+    @State private var workChainPath: String = ""
+    @State private var workPrivatePath: String = ""
+    @State private var workEndpoint: String = ""
+
     private let completionSounds = ["Hero", "Pop", "Tink", "Ping", "Morse", "Bottle", "Purr"]
 
     var body: some View {
@@ -29,6 +35,7 @@ struct SettingsView: View {
                 themeSection
                 providerSection
                 apiKeysSection
+                workLLMSection
                 personalitySection
                 soundSection
             }
@@ -238,6 +245,98 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Work LLM
+
+    private var workLLMSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionLabel("WORK LLM (FLOODGATE)")
+
+            Text("Route Claude through Apple's internal AI gateway via mTLS instead of an Anthropic API key. Toggle off to use the regular Anthropic API.")
+                .font(Typography.body(size: 12))
+                .foregroundStyle(theme.secondaryText.opacity(0.7))
+
+            Toggle(isOn: $useWorkLLM) {
+                Text("Use Work LLM")
+                    .font(Typography.bodyMedium(size: 13))
+                    .foregroundStyle(theme.primaryText)
+            }
+            .toggleStyle(.switch)
+            .onChange(of: useWorkLLM) { _, _ in markChanged() }
+
+            if useWorkLLM {
+                workLLMField(label: "Chain certificate (chain.pem)", value: $workChainPath)
+                workLLMField(label: "Private key (private.pem)", value: $workPrivatePath)
+                workLLMField(label: "Endpoint (optional)", value: $workEndpoint, secure: false)
+
+                if let err = llmService?.workLLMConfigError, useWorkLLM {
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        Text(err)
+                            .font(Typography.caption(size: 11))
+                            .foregroundStyle(theme.primaryText)
+                    }
+                    .padding(8)
+                    .background(Color.orange.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+
+                if llmService?.workLLMConfigured == true {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                        Text("Certificates configured")
+                            .font(Typography.caption(size: 11))
+                            .foregroundStyle(.green)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func workLLMField(label: String, value: Binding<String>, secure: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(Typography.caption(size: 11))
+                .foregroundStyle(theme.secondaryText)
+
+            HStack {
+                TextField(label, text: value)
+                    .textFieldStyle(.plain)
+                    .font(Typography.body(size: 13))
+                    .padding(10)
+                    .background(theme.secondaryBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(theme.border, lineWidth: 1)
+                    )
+                    .onChange(of: value.wrappedValue) { _, _ in markChanged() }
+
+                #if os(macOS)
+                if !label.lowercased().contains("endpoint") {
+                    Button("Browse…") {
+                        if let path = pickFile() { value.wrappedValue = path }
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(theme.accent)
+                }
+                #endif
+            }
+        }
+    }
+
+    #if os(macOS)
+    private func pickFile() -> String? {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        return panel.runModal() == .OK ? panel.url?.path : nil
+    }
+    #endif
+
     // MARK: - Personality
 
     private var personalitySection: some View {
@@ -418,6 +517,10 @@ struct SettingsView: View {
         selectedProvider = LLMProviderType(rawValue: config.selectedProvider) ?? .anthropic
         selectedPersonality = config.selectedPersonality
         selectedCompletionSound = config.completionSound
+        useWorkLLM = config.useWorkLLM
+        workChainPath = config.workLLMChainPath
+        workPrivatePath = config.workLLMPrivateKeyPath
+        workEndpoint = config.workLLMEndpoint
     }
 
     private func markChanged() {
@@ -433,6 +536,10 @@ struct SettingsView: View {
         let currentThemeId = themeManager.current.id
         let currentPersonality = selectedPersonality
         let currentSound = selectedCompletionSound
+        let currentUseWorkLLM = useWorkLLM
+        let currentWorkChain = workChainPath
+        let currentWorkPrivate = workPrivatePath
+        let currentWorkEndpoint = workEndpoint
 
         Task {
             try? await vaultManager.updateConfiguration { config in
@@ -443,6 +550,15 @@ struct SettingsView: View {
                 config.selectedTheme = currentThemeId
                 config.selectedPersonality = currentPersonality
                 config.completionSound = currentSound
+                config.useWorkLLM = currentUseWorkLLM
+                config.workLLMChainPath = currentWorkChain
+                config.workLLMPrivateKeyPath = currentWorkPrivate
+                config.workLLMEndpoint = currentWorkEndpoint
+            }
+
+            // Reload LLM client so the toggle takes effect immediately.
+            if currentUseWorkLLM {
+                llmService?.tryConfigureWorkLLM()
             }
 
             // Update LLM service with new keys

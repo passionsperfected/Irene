@@ -11,6 +11,10 @@ enum AppModule: String, CaseIterable, Identifiable, Sendable {
     case mail
     case calendar
     case recording
+    case sprints
+    case github
+    case radar
+    case vacation
 
     var id: String { rawValue }
 
@@ -25,6 +29,10 @@ enum AppModule: String, CaseIterable, Identifiable, Sendable {
         case .mail: return "Mail"
         case .calendar: return "Calendar"
         case .recording: return "Recording"
+        case .sprints: return "Sprint Goals"
+        case .github: return "GitHub"
+        case .radar: return "Radar"
+        case .vacation: return "Vacation"
         }
     }
 
@@ -39,6 +47,10 @@ enum AppModule: String, CaseIterable, Identifiable, Sendable {
         case .mail: return "envelope"
         case .calendar: return "calendar"
         case .recording: return "waveform"
+        case .sprints: return "flag.checkered"
+        case .github: return "chevron.left.forwardslash.chevron.right"
+        case .radar: return "dot.radiowaves.left.and.right"
+        case .vacation: return "sun.and.horizon"
         }
     }
 }
